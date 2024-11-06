@@ -34,6 +34,8 @@ class BLE_async():
 
                     if data_ready:
                         data = {}
+                        data["Charging"] = int(mdata[7])>>6
+                        data["Gyro Clipping"] = (int(mdata[6])>>7)==1
                         data["Motionless"] = (int(mdata[7]) & 0x03) + int(mdata[8])
                         data["Shot Number"] = shot_number
                         data["Tip Percent"] = int(mdata[11])

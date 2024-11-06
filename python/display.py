@@ -43,8 +43,8 @@ class Scaffold():
         self._frames = 1 # can be 1 or 2
         self._ball_pad = 25
 
-        self._width = 800
-        self._height = 400
+        self._width = 1920
+        self._height = 1080
 
         self._digiball_data = None
 
@@ -124,7 +124,10 @@ class Scaffold():
                 # Spin
                 center = (left + dial_offset_x, top + dial_offset_y)
                 spin_rpm = self._digiball_data["Spin RPM"]
-                spin.update_data(spin_rpm/1000,"%i"%spin_rpm,"RPM")
+                spin_text = "%i"%spin_rpm
+                if self._digiball_data["Gyro Clipping"]:
+                    spin_text = "%s+"%spin_text
+                spin.update_data(spin_rpm/900,spin_text,"RPM")
                 spin.draw(center, dial_radius)
 
                 # Tip Offset
@@ -145,7 +148,15 @@ class Scaffold():
 
                 # Time
                 time_sec = self._digiball_data["Motionless"]
-                time.update_data(time_sec/300,"%i"%time_sec,"SEC")
+                charging = self._digiball_data["Charging"]
+                if charging == 1:
+                    time.update_data(0, "CHARGING","")
+                elif charging == 2:
+                    time.update_data(0, "CHARGE", "ERROR")
+                elif charging == 3:
+                    time.update_data(1, "CHARGE", "COMPLETE")
+                else:
+                    time.update_data(time_sec / 300, "%i" % time_sec, "SEC")
                 center = (left + width - dial_offset_x, top + height - dial_offset_y)
                 time.draw(center, dial_radius)
 
