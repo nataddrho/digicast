@@ -1,7 +1,7 @@
 import pygame
 from math import *
 from pygame.locals import *
-from matplotlib import cm
+import cmap
 import numpy as np
 
 
@@ -55,7 +55,8 @@ class Dial():
             if f>v:
                 break
             start_deg = zero_deg + length_deg*i
-            color = 255*np.array(cm.jet(0.9*f)[:3])
+            cm = cm = cmap.Colormap(["blue","green","yellow","red"])
+            color = 255*np.array(cm(f)[:3])
             self._draw_dial_arc_segment(start_deg, length_deg, color)
 
     def _draw_dial_arc_segment(self, start_deg, length_deg, color):
