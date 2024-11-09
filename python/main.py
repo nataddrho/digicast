@@ -16,39 +16,51 @@ class BLE_async():
         self._devices = None
         self._done = True
         self._last_shot_number = -1
+        self.mac_address = None
 
     async def _scan(self):
         self._devices = await BleakScanner.discover(2.0, return_adv=True)
 
     def _digiball_parser(self, devices):
-        for device in devices:
-            d = devices[device][1]
+        for mac_address in devices:
+            d = devices[mac_address][1]
             rssi = d.rssi
             manuf = d.manufacturer_data
             for manuf_id in manuf:
                 if manuf_id == 0x03DE: #NRLLC
-                    mdata = manuf[manuf_id]
 
-                    data_ready = (int(mdata[17]) >> 6) == 1;
-                    shot_number = int(mdata[6]) & 0x3F
+                    # Save device as target if brought close to receiver
+                    if (self.mac_address is None and rssi>-60):
+                        self.mac_address = mac_address
 
-                    if data_ready:
-                        data = {}
-                        data["Charging"] = int(mdata[7])>>6
-                        data["Gyro Clipping"] = (int(mdata[6])>>7)==1
-                        data["Motionless"] = (int(mdata[7]) & 0x03) + int(mdata[8])
-                        data["Shot Number"] = shot_number
-                        data["Tip Percent"] = int(mdata[11])
-                        speed_factor = int(mdata[12])
-                        spin_horz_dps = struct.unpack('>h', mdata[13:15])[0]
-                        spin_vert_dps = struct.unpack('>h', mdata[15:17])[0]
-                        spin_mag_rpm = sqrt(spin_horz_dps ** 2 + spin_vert_dps ** 2) / 6
-                        data["Speed MPH"] = 0.06 * speed_factor
-                        spin_degrees = 180 / pi * atan2(spin_horz_dps, spin_vert_dps)
-                        data["Spin RPM"] = spin_mag_rpm
-                        data["Tip Angle"] = spin_degrees
+                    if mac_address == self.mac_address:
 
-                        return data
+                        mdata = manuf[manuf_id]
+
+                        data_ready = (int(mdata[17]) >> 6) == 1;
+                        shot_number = int(mdata[6]) & 0x3F
+
+                        if data_ready:
+                            data = {}
+                            data["RSSI"] = rssi
+                            data["MAC Address"] = mac_address
+                            data["Charging"] = int(mdata[7])>>6
+                            data["Gyro Clipping"] = (int(mdata[6])>>7)==1
+                            data["Motionless"] = (int(mdata[7]) & 0x03) + int(mdata[8])
+                            data["Shot Number"] = shot_number
+                            data["Tip Percent"] = int(mdata[11])
+                            speed_factor = int(mdata[12])
+                            spin_horz_dps = struct.unpack('>h', mdata[13:15])[0]
+                            spin_vert_dps = struct.unpack('>h', mdata[15:17])[0]
+                            spin_mag_rpm = sqrt(spin_horz_dps ** 2 + spin_vert_dps ** 2) / 6
+                            data["Speed KMPH"] = 0.06 * 1.60934 * speed_factor
+                            spin_degrees = 180 / pi * atan2(spin_horz_dps, spin_vert_dps)
+                            data["Spin RPS"] = spin_mag_rpm/60
+                            data["Tip Angle"] = spin_degrees
+
+                            print(rssi)
+
+                            return data
         return None
 
 
@@ -72,6 +84,8 @@ def gui_main():
     pygame.font.init()
 
     scaffold = display.Scaffold()
+
+    pygame.mouse.set_visible(False)
 
     # Variable to keep our game loop running
     gameOn = True
@@ -110,6 +124,8 @@ def gui_main():
 
         scaffold.draw()
         pygame.display.flip()
+
+
 
 
 if __name__ == '__main__':

@@ -102,6 +102,12 @@ class Dial():
             self._update_large_text()
             self._update_small_text()
         elif self._data_changed:
+            # Clear dial by drawing black
+            center_x, center_y = self._center
+            rect = pygame.Rect((center_x - radius, center_y - radius), (2*radius, 2*radius))
+            pygame.draw.rect(self._screen,(0,0,0),rect)
+
+            # Update text
             self._update_large_text()
             self._update_small_text()
 

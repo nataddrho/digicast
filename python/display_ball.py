@@ -82,7 +82,7 @@ class Ball():
         color = (0, 255, 255)
         x = center_x + self._radius * ax * r1 / ball_radius
         y = center_y + self._radius * ay * r1 / ball_radius
-        tr /= 20
+        tr /= 10
         if tr<3:
             tr = 3
         pygame.draw.circle(self._screen, color, (x, y), tr)

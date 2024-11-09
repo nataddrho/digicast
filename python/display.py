@@ -52,6 +52,9 @@ class Scaffold():
         self._screen = pygame.display.set_mode((self._width, self._height),
                                                pygame.RESIZABLE)
 
+        # Clear screen
+        self._screen.fill((0, 0, 0))
+
         self._frame_objects = []
         for i in range(0, self._frames):
             objects = []
@@ -68,7 +71,6 @@ class Scaffold():
 
     def update_data(self, digiball_data):
         if digiball_data is not None:
-            self._screen.fill((0, 0, 0))
             self._digiball_data = digiball_data
 
     def draw(self):
@@ -110,8 +112,14 @@ class Scaffold():
             center = (center_x, center_y)
 
             if self._digiball_data is None:
-                #No data. Just draw ball
-                ball.draw(center, ball_radius)
+
+                # Message
+                font = pygame.font.SysFont("Tahoma", 48)
+                fs = font.render('Move DigiBall close to receiver to connect...', False, (255,255,255))
+                text_pos = (center_x - fs.get_width()/2,
+                            center_y - fs.get_height()/2)
+                self._screen.blit(fs, text_pos)
+
             else:
 
                 tip_percent = self._digiball_data["Tip Percent"]
@@ -123,11 +131,11 @@ class Scaffold():
 
                 # Spin
                 center = (left + dial_offset_x, top + dial_offset_y)
-                spin_rpm = self._digiball_data["Spin RPM"]
-                spin_text = "%i"%spin_rpm
+                spin_rps = self._digiball_data["Spin RPS"]
+                spin_text = "%.1f"%spin_rps
                 if self._digiball_data["Gyro Clipping"]:
                     spin_text = "%s+"%spin_text
-                spin.update_data(spin_rpm/900,spin_text,"RPM")
+                spin.update_data(spin_rps/15,spin_text,"RPS")
                 spin.draw(center, dial_radius)
 
                 # Tip Offset
@@ -138,12 +146,12 @@ class Scaffold():
 
                 # Speed
                 center = (left + dial_offset_x, top + height - dial_offset_y)
-                speed_mph = self._digiball_data["Speed MPH"]
-                speed_mph = round(speed_mph * 2) / 2 # precision 0f 0.5 mph
-                speed_text = "%.1f"%speed_mph
-                if (speed_mph>7):
+                speed_kmph = self._digiball_data["Speed KMPH"]
+                speed_kmph = round(speed_kmph * 2) / 2 # precision 0f 0.5 mph
+                speed_text = "%.1f"%speed_kmph
+                if (speed_kmph>7):
                     speed_text = "%s+"%speed_text
-                speed.update_data(speed_mph / 8,speed_text,"MPH")
+                speed.update_data(speed_kmph / 12,speed_text,"KM/H")
                 speed.draw(center, dial_radius)
 
                 # Time
@@ -159,6 +167,8 @@ class Scaffold():
                     time.update_data(time_sec / 300, "%i" % time_sec, "SEC")
                 center = (left + width - dial_offset_x, top + height - dial_offset_y)
                 time.draw(center, dial_radius)
+
+
 
 
 
