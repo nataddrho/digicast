@@ -46,7 +46,7 @@ class Scaffold():
         self._width = 1920
         self._height = 1080
 
-        self._digiball_data = None
+        self._digiball_data = [None,None]
 
         # Define the dimensions of screen object
         self._screen = pygame.display.set_mode((self._width, self._height),
@@ -56,7 +56,7 @@ class Scaffold():
         self._screen.fill((0, 0, 0))
 
         self._frame_objects = []
-        for i in range(0, self._frames):
+        for i in range(0, 2):
             objects = []
             objects.append(display_ball.Ball(self._screen, i == 1))
             objects.append(display_dial.Dial(self._screen))
@@ -72,6 +72,10 @@ class Scaffold():
     def update_data(self, digiball_data):
         if digiball_data is not None:
             self._digiball_data = digiball_data
+            if digiball_data[1] is not None:
+                if (self._frames) != 2:
+                    self._screen.fill((0,0,0))
+                    self._frames = 2
 
     def draw(self):
 
@@ -111,7 +115,7 @@ class Scaffold():
             # Ball
             center = (center_x, center_y)
 
-            if self._digiball_data is None:
+            if frame==0 and self._digiball_data[0] is None and self._digiball_data[1] is None:
 
                 # Message
                 font = pygame.font.SysFont("Tahoma", 48)
@@ -122,51 +126,55 @@ class Scaffold():
 
             else:
 
-                tip_percent = self._digiball_data["Tip Percent"]
-                tip_percent = round(tip_percent / 5) * 5  # precision of 5 percent
-                tip_angle = self._digiball_data["Tip Angle"]
+                data = self._digiball_data[frame]
 
-                # Ball
-                ball.draw(center, ball_radius, tip_angle, tip_percent)
+                if data is not None:
 
-                # Spin
-                center = (left + dial_offset_x, top + dial_offset_y)
-                spin_rps = self._digiball_data["Spin RPS"]
-                spin_text = "%.1f"%spin_rps
-                if self._digiball_data["Gyro Clipping"]:
-                    spin_text = "%s+"%spin_text
-                spin.update_data(spin_rps/15,spin_text,"RPS")
-                spin.draw(center, dial_radius)
+                    tip_percent = data["Tip Percent"]
+                    tip_percent = round(tip_percent / 5) * 5  # precision of 5 percent
+                    tip_angle = data["Tip Angle"]
 
-                # Tip Offset
-                center = (left + width - dial_offset_x, top + dial_offset_y)
+                    # Ball
+                    ball.draw(center, ball_radius, tip_angle, tip_percent)
 
-                tip.update_data(tip_percent/55, "%i"%tip_percent, "PFC")
-                tip.draw(center, dial_radius)
+                    # Spin
+                    center = (left + dial_offset_x, top + dial_offset_y)
+                    spin_rps = data["Spin RPS"]
+                    spin_text = "%.1f"%spin_rps
+                    if data["Gyro Clipping"]:
+                        spin_text = "%s+"%spin_text
+                    spin.update_data(spin_rps/15,spin_text,"RPS")
+                    spin.draw(center, dial_radius)
 
-                # Speed
-                center = (left + dial_offset_x, top + height - dial_offset_y)
-                speed_kmph = self._digiball_data["Speed KMPH"]
-                speed_kmph = round(speed_kmph * 2) / 2 # precision 0f 0.5 mph
-                speed_text = "%.1f"%speed_kmph
-                if (speed_kmph>7):
-                    speed_text = "%s+"%speed_text
-                speed.update_data(speed_kmph / 12,speed_text,"KM/H")
-                speed.draw(center, dial_radius)
+                    # Tip Offset
+                    center = (left + width - dial_offset_x, top + dial_offset_y)
 
-                # Time
-                time_sec = self._digiball_data["Motionless"]
-                charging = self._digiball_data["Charging"]
-                if charging == 1:
-                    time.update_data(0, "CHARGING","")
-                elif charging == 2:
-                    time.update_data(0, "CHARGE", "ERROR")
-                elif charging == 3:
-                    time.update_data(1, "CHARGE", "COMPLETE")
-                else:
-                    time.update_data(time_sec / 300, "%i" % time_sec, "SEC")
-                center = (left + width - dial_offset_x, top + height - dial_offset_y)
-                time.draw(center, dial_radius)
+                    tip.update_data(tip_percent/55, "%i"%tip_percent, "PFC")
+                    tip.draw(center, dial_radius)
+
+                    # Speed
+                    center = (left + dial_offset_x, top + height - dial_offset_y)
+                    speed_kmph = data["Speed KMPH"]
+                    speed_kmph = round(speed_kmph * 2) / 2 # precision 0f 0.5 mph
+                    speed_text = "%.1f"%speed_kmph
+                    if (speed_kmph>7):
+                        speed_text = "%s+"%speed_text
+                    speed.update_data(speed_kmph / 12,speed_text,"KM/H")
+                    speed.draw(center, dial_radius)
+
+                    # Time
+                    time_sec = data["Motionless"]
+                    charging = data["Charging"]
+                    if charging == 1:
+                        time.update_data(0, "CHARGING","")
+                    elif charging == 2:
+                        time.update_data(0, "CHARGE", "ERROR")
+                    elif charging == 3:
+                        time.update_data(1, "CHARGE", "COMPLETE")
+                    else:
+                        time.update_data(time_sec / 300, "%i" % time_sec, "SEC")
+                    center = (left + width - dial_offset_x, top + height - dial_offset_y)
+                    time.draw(center, dial_radius)
 
 
 
