@@ -20,7 +20,7 @@ class BLE_async():
         self.mac_addresses = [None,None]
 
     async def _scan(self):
-        self._devices = await BleakScanner.discover(2.0, return_adv=True, scanning_mode="passive")
+        self._devices = await BleakScanner.discover(2.0, return_adv=True)
 
     def _digiball_parser(self, devices):
 
