@@ -9,6 +9,7 @@ from bleak import BleakScanner
 import asyncio
 import struct
 from math import *
+import sys
 
 class BLE_async():
 
@@ -19,7 +20,7 @@ class BLE_async():
         self.mac_addresses = [None,None]
 
     async def _scan(self):
-        self._devices = await BleakScanner.discover(2.0, return_adv=True)
+        self._devices = await BleakScanner.discover(2.0, return_adv=True, scanning_mode="passive")
 
     def _digiball_parser(self, devices):
 
@@ -84,7 +85,8 @@ class BLE_async():
         except:
             pass
 
-def gui_main():
+
+def gui_main(ball_type):
 
     ble = BLE_async()
     q = queue.Queue()
@@ -96,7 +98,7 @@ def gui_main():
     pygame.init()
     pygame.font.init()
 
-    scaffold = display.Scaffold()
+    scaffold = display.Scaffold(ball_type)
 
     pygame.mouse.set_visible(False)
 
@@ -143,5 +145,14 @@ def gui_main():
 
 if __name__ == '__main__':
 
-    gui_main()
+    if "carom" in sys.argv:
+        ball_type = "carom"
+    elif "snooker" in sys.argv:
+        ball_type = "snooker"
+    else:
+        ball_type = "pool"
+
+    print("Nathan Rhoades LLC, 11/9/2024")
+    print("digiball-pi: %s" % ball_type)
+    gui_main(ball_type)
 

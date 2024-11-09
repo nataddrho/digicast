@@ -38,10 +38,11 @@ def optimize_circle_placement(center_x, center_y, ball_radius):
 
 class Scaffold():
 
-    def __init__(self):
+    def __init__(self, ball_type):
 
         self._frames = 1 # can be 1 or 2
         self._ball_pad = 25
+        self._ball_type = ball_type
 
         self._width = 1920
         self._height = 1080
@@ -58,7 +59,7 @@ class Scaffold():
         self._frame_objects = []
         for i in range(0, 2):
             objects = []
-            objects.append(display_ball.Ball(self._screen, i == 1))
+            objects.append(display_ball.Ball(self._screen, self._ball_type, i == 1))
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_dial.Dial(self._screen))
@@ -175,6 +176,13 @@ class Scaffold():
                         time.update_data(time_sec / 300, "%i" % time_sec, "SEC")
                     center = (left + width - dial_offset_x, top + height - dial_offset_y)
                     time.draw(center, dial_radius)
+
+                    # RSSI
+                    rssi = data["RSSI"]
+                    font = pygame.font.SysFont("Tahoma", 18)
+                    fs = font.render("%i"%rssi, False, (80, 80, 80))
+                    pygame.draw.rect(self._screen,(0,0,0),pygame.Rect(left,top,fs.get_width(),fs.get_height()))
+                    self._screen.blit(fs, (left,top))
 
 
 

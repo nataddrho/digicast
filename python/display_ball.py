@@ -5,10 +5,11 @@ from math import *
 
 class Ball():
 
-    def __init__(self, screen, yellow_ball=False):
+    def __init__(self, screen, ball_type, yellow_ball=False):
         self._radius = None
         self._center = None
         self._screen = screen
+        self._ball_type = ball_type # pool, carom, snooker
 
         if (yellow_ball):
             self._ball_image = pygame.image.load("assets/blank_yellow_hires.png")
@@ -48,10 +49,20 @@ class Ball():
 
 
         # Calculate tip outline position
-        ball_radius = 1.125
-        tip_radius = ball_radius * 11.8 / 57.15
-        tip_radius_dime = 0.358
-        tip_radius_curvature_ratio = tip_radius_dime / ball_radius
+        if self._ball_type == "carom":
+            ball_radius = 1.211
+            tip_radius = 11.5 / (25.4 * 2)
+            tip_curvature = 0.358
+        elif self._ball_type == "snooker":
+            ball_radius = 1.033
+            tip_radius = 10.0 / (25.4 * 2)
+            tip_curvature = 0.250
+        else: #pool
+            ball_radius = 1.125
+            tip_radius = 11.8 / (25.4 * 2)
+            tip_curvature = 0.358
+
+        tip_radius_curvature_ratio = tip_curvature / ball_radius
 
         t = tip_percent
         if t>55:
