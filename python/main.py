@@ -58,8 +58,6 @@ class BLE_async():
                             data["Spin RPS"] = spin_mag_rpm/60
                             data["Tip Angle"] = spin_degrees
 
-                            print(rssi)
-
                             return data
         return None
 
