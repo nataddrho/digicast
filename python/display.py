@@ -167,7 +167,7 @@ class Scaffold():
                     time_sec = data["Motionless"]
                     charging = data["Charging"]
                     if charging == 1:
-                        time.update_data(0, "CHARGING","")
+                        time.update_data(0, "CHARGE","BATTERY")
                     elif charging == 2:
                         time.update_data(0, "CHARGE", "ERROR")
                     elif charging == 3:
