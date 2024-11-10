@@ -53,5 +53,5 @@ Replace "pool" with "snooker" or "carom" depending on the type of DigiBall you o
 
 ### How to Use:
 
-![alt text](https://github.com/nataddrho/digiball-pi/python/oneplayer.jpg?raw=true)
+![alt text](https://github.com/nataddrho/digiball-pi/blob/master/pictures/oneplayer.jpg?raw=true)
 
