@@ -47,7 +47,8 @@ class Scaffold():
         self._width = 1920
         self._height = 1080
 
-        self._digiball_data = [None,None]
+        self._digiball_data = [None, None]
+        self._digicue_data = [None, None]
 
         # Define the dimensions of screen object
         self._screen = pygame.display.set_mode((self._width, self._height),
@@ -70,12 +71,28 @@ class Scaffold():
         self._width = width
         self._height = height
 
-    def update_data(self, digiball_data):
+    def update_data(self, digiball_data, digicue_data):
+
+        clearScreen = False
+        for i in range(0, 2):
+            if self._digiball_data[i] is None and digiball_data[i] is not None:
+                clearScreen = True
+            if self._digicue_data[i] is None and digicue_data[i] is not None:
+                clearScreen = True
+
+        if clearScreen:
+            self._screen.fill((0, 0, 0))
+
         if digiball_data is not None:
             self._digiball_data = digiball_data
             if digiball_data[1] is not None:
                 if (self._frames) != 2:
-                    self._screen.fill((0,0,0))
+                    self._frames = 2
+
+        if digicue_data is not None:
+            self._digicue_data = digicue_data
+            if digicue_data[1] is not None:
+                if (self._frames) != 2:
                     self._frames = 2
 
     def draw(self):
