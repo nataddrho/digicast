@@ -45,8 +45,11 @@ class Scaffold():
         self._ball_pad = 25
         self._ball_type = ball_type
 
-        self._width = 1920
-        self._height = 1080
+        #self._width = 1920
+        #self._height = 1080
+
+        self._width = 800
+        self._height = 600
 
         self._digiball_data = [None, None]
         self._digicue_data = [None, None]
@@ -105,18 +108,37 @@ class Scaffold():
         self._screen.blit(fs, (frame_left, frame_top))
 
     def draw(self):
+        player1_digiball = self._digiball_data[0] is not None
+        player2_digiball = self._digiball_data[1] is not None
+        player1_digicue = self._digicue_data[0] is not None
+        player2_digicue = self._digicue_data[1] is not None
+        device_found = player1_digicue or player2_digicue or player1_digiball or player2_digiball
 
         # Draw complications and ball displays
         dial_offset_x, dial_offset_y, dial_radius = (0, 0, 1)
         for frame in range(self._frames):
-            width = self._width / self._frames
-            height = self._height
-            left = width * frame
-            top = 0
-            center_x = left + width / 2
-            center_y = top + height / 2
+            digiball_data = self._digiball_data[frame]
+            digicue_data = self._digicue_data[frame]
+            digiball_present = digiball_data is not None
+            digicue_present = digicue_data is not None
 
-            ball_radius_optimized = min(width, height) / 2 - self._ball_pad
+            width_digiball = self._width / self._frames
+            width_digicue = 0
+            if digiball_present and digicue_present:
+                width_digicue = width_digiball * 1/3
+                width_digiball *= 2/3
+            elif digicue_present:
+                width_digiball *= 1/2
+                width_digicue = width_digiball
+
+            height = self._height
+            left = width_digiball * frame
+            top = 0
+            center_x = left + width_digiball / 2
+            center_y = top + height / 2
+            ball_radius_optimized = min(width_digiball, height) / 2 - self._ball_pad
+
+            ball, spin, tip, speed, time, graph = self._frame_objects[frame]
 
             if frame == 0:
                 ret = optimize_circle_placement(center_x, center_y, ball_radius_optimized)
@@ -137,14 +159,6 @@ class Scaffold():
             pygame.draw.circle(self.screen, color, (center_x, center_y), ball_radius, 1)
             """
 
-            ball, spin, tip, speed, time, graph = self._frame_objects[frame]
-
-            player1_digiball = self._digiball_data[0] is not None
-            player2_digiball = self._digiball_data[1] is not None
-            player1_digicue = self._digicue_data[0] is not None
-            player2_digicue = self._digicue_data[1] is not None
-            device_found = player1_digicue or player2_digicue or player1_digiball or player2_digiball
-
             if frame == 0 and not device_found:
                 # Message
                 font = pygame.font.SysFont("Tahoma", 48)
@@ -155,18 +169,12 @@ class Scaffold():
 
             else:
 
-                digiball_data = self._digiball_data[frame]
-                digicue_data = self._digicue_data[frame]
-                digiball_present = digiball_data is not None
-                digicue_present = digicue_data is not None
-
                 if digiball_present or digicue_present:
 
                     if digicue_present:
                         # DigiBall Graph
-                        graph.update_data(0.5, "99", "test")
-                        center = (left + width / 2, top + height / 2)
-                        graph.draw(center, dial_radius)
+                        graph.update_data(0.5, "Hello")
+                        graph.draw(left + width_digiball + 10, top + 10, width_digicue - 20, height - 20)
 
                     if digiball_present:
 
@@ -174,10 +182,19 @@ class Scaffold():
                         tip_percent = round(tip_percent / 5) * 5  # precision of 5 percent
                         tip_angle = digiball_data["Tip Angle"]
 
-                        # Ball
-                        center = (center_x, center_y)
-                        ball.draw(center, ball_radius_optimized, tip_angle, tip_percent)
+                        if digicue_present:
+                            # Ball towards left between complication dials
+                            #radius = (width - 4*dial_offset_x)/4
+                            #center = (center_x - radius, center_y)
+                            #ball.draw(center, radius, tip_angle, tip_percent)
+                            center = (center_x, center_y)
+                            ball.draw(center, ball_radius_optimized, tip_angle, tip_percent)
+                        else:
+                            # Ball in center, optimized
+                            center = (center_x, center_y)
+                            ball.draw(center, ball_radius_optimized, tip_angle, tip_percent)
 
+                    if digiball_present:
                         # Spin
                         center = (left + dial_offset_x, top + dial_offset_y)
                         spin_rps = digiball_data["Spin RPS"]
@@ -188,7 +205,7 @@ class Scaffold():
                         spin.draw(center, dial_radius)
 
                         # Tip Offset
-                        center = (left + width - dial_offset_x, top + dial_offset_y)
+                        center = (left + width_digiball - dial_offset_x, top + dial_offset_y)
 
                         tip.update_data(tip_percent / 55, "%i" % tip_percent, "PFC")
                         tip.draw(center, dial_radius)
@@ -214,8 +231,9 @@ class Scaffold():
                             time.update_data(1, "CHARGE", "COMPLETE")
                         else:
                             time.update_data(time_sec / 300, "%i" % time_sec, "SEC")
-                        center = (left + width - dial_offset_x, top + height - dial_offset_y)
+                        center = (left + width_digiball - dial_offset_x, top + height - dial_offset_y)
                         time.draw(center, dial_radius)
+
 
                 # RSSI
                 if digiball_present and digicue_present:
