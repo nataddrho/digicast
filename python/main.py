@@ -47,8 +47,11 @@ def gui_main(ball_type):
             elif event.type == VIDEORESIZE:
                 scaffold.update_size(event.w, event.h)
 
+        if ble.test:
+            digiball_data, digicue_data = ble.get_test_data()
+            scaffold.update_data(digiball_data, digicue_data)
 
-        if not q.empty():
+        elif not q.empty():
             digiball_data, digicue_data = q.get()
             if (digiball_data[0] is not None or digiball_data[1] is not None or
                     digicue_data[0] is not None or digicue_data[1] is not None):

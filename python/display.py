@@ -3,6 +3,7 @@ from math import *
 from pygame.locals import *
 import display_dial
 import display_ball
+import display_graph
 
 
 def optimize_circle_placement(center_x, center_y, ball_radius):
@@ -33,14 +34,14 @@ def optimize_circle_placement(center_x, center_y, ball_radius):
         r = r + dx / 2
         x = x - dx / 2
 
-    return [x, y, 0.9*r]
+    return [x, y, 0.9 * r]
 
 
 class Scaffold():
 
     def __init__(self, ball_type):
 
-        self._frames = 1 # can be 1 or 2
+        self._frames = 1  # can be 1 or 2
         self._ball_pad = 25
         self._ball_type = ball_type
 
@@ -65,6 +66,7 @@ class Scaffold():
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_dial.Dial(self._screen))
+            objects.append(display_graph.Graph(self._screen))
             self._frame_objects.append(objects)
 
     def update_size(self, width, height):
@@ -95,6 +97,13 @@ class Scaffold():
                 if (self._frames) != 2:
                     self._frames = 2
 
+    def _draw_rssi(self, rssi_text, frame_left, frame_top):
+        # RSSI
+        font = pygame.font.SysFont("Tahoma", 18)
+        fs = font.render(rssi_text, False, (80, 80, 80))
+        pygame.draw.rect(self._screen, (0, 0, 0), pygame.Rect(frame_left, frame_top, fs.get_width(), fs.get_height()))
+        self._screen.blit(fs, (frame_left, frame_top))
+
     def draw(self):
 
         # Draw complications and ball displays
@@ -107,10 +116,10 @@ class Scaffold():
             center_x = left + width / 2
             center_y = top + height / 2
 
-            ball_radius = min(width, height) / 2 - self._ball_pad
+            ball_radius_optimized = min(width, height) / 2 - self._ball_pad
 
             if frame == 0:
-                ret = optimize_circle_placement(center_x, center_y, ball_radius)
+                ret = optimize_circle_placement(center_x, center_y, ball_radius_optimized)
                 dial_offset_x, dial_offset_y, dial_radius = ret
 
             """
@@ -128,80 +137,91 @@ class Scaffold():
             pygame.draw.circle(self.screen, color, (center_x, center_y), ball_radius, 1)
             """
 
-            ball, spin, tip, speed, time = self._frame_objects[frame]
+            ball, spin, tip, speed, time, graph = self._frame_objects[frame]
 
-            # Ball
-            center = (center_x, center_y)
+            player1_digiball = self._digiball_data[0] is not None
+            player2_digiball = self._digiball_data[1] is not None
+            player1_digicue = self._digicue_data[0] is not None
+            player2_digicue = self._digicue_data[1] is not None
+            device_found = player1_digicue or player2_digicue or player1_digiball or player2_digiball
 
-            if frame==0 and self._digiball_data[0] is None and self._digiball_data[1] is None:
-
+            if frame == 0 and not device_found:
                 # Message
                 font = pygame.font.SysFont("Tahoma", 48)
-                fs = font.render('Move DigiBall close to receiver to connect...', False, (255,255,255))
-                text_pos = (center_x - fs.get_width()/2,
-                            center_y - fs.get_height()/2)
+                fs = font.render('Move DigiBall/DigiCue close to receiver to connect...', False, (255, 255, 255))
+                text_pos = (center_x - fs.get_width() / 2,
+                            center_y - fs.get_height() / 2)
                 self._screen.blit(fs, text_pos)
 
             else:
 
-                data = self._digiball_data[frame]
+                digiball_data = self._digiball_data[frame]
+                digicue_data = self._digicue_data[frame]
+                digiball_present = digiball_data is not None
+                digicue_present = digicue_data is not None
 
-                if data is not None:
+                if digiball_present or digicue_present:
 
-                    tip_percent = data["Tip Percent"]
-                    tip_percent = round(tip_percent / 5) * 5  # precision of 5 percent
-                    tip_angle = data["Tip Angle"]
+                    if digicue_present:
+                        # DigiBall Graph
+                        graph.update_data(0.5, "99", "test")
+                        center = (left + width / 2, top + height / 2)
+                        graph.draw(center, dial_radius)
 
-                    # Ball
-                    ball.draw(center, ball_radius, tip_angle, tip_percent)
+                    if digiball_present:
 
-                    # Spin
-                    center = (left + dial_offset_x, top + dial_offset_y)
-                    spin_rps = data["Spin RPS"]
-                    spin_text = "%.1f"%spin_rps
-                    if data["Gyro Clipping"]:
-                        spin_text = "%s+"%spin_text
-                    spin.update_data(spin_rps/15,spin_text,"RPS")
-                    spin.draw(center, dial_radius)
+                        tip_percent = digiball_data["Tip Percent"]
+                        tip_percent = round(tip_percent / 5) * 5  # precision of 5 percent
+                        tip_angle = digiball_data["Tip Angle"]
 
-                    # Tip Offset
-                    center = (left + width - dial_offset_x, top + dial_offset_y)
+                        # Ball
+                        center = (center_x, center_y)
+                        ball.draw(center, ball_radius_optimized, tip_angle, tip_percent)
 
-                    tip.update_data(tip_percent/55, "%i"%tip_percent, "PFC")
-                    tip.draw(center, dial_radius)
+                        # Spin
+                        center = (left + dial_offset_x, top + dial_offset_y)
+                        spin_rps = digiball_data["Spin RPS"]
+                        spin_text = "%.1f" % spin_rps
+                        if digiball_data["Gyro Clipping"]:
+                            spin_text = "%s+" % spin_text
+                        spin.update_data(spin_rps / 15, spin_text, "RPS")
+                        spin.draw(center, dial_radius)
 
-                    # Speed
-                    center = (left + dial_offset_x, top + height - dial_offset_y)
-                    speed_kmph = data["Speed KMPH"]
-                    speed_kmph = round(speed_kmph * 2) / 2 # precision 0f 0.5 mph
-                    speed_text = "%.1f"%speed_kmph
-                    if (speed_kmph>7):
-                        speed_text = "%s+"%speed_text
-                    speed.update_data(speed_kmph / 12,speed_text,"KM/H")
-                    speed.draw(center, dial_radius)
+                        # Tip Offset
+                        center = (left + width - dial_offset_x, top + dial_offset_y)
 
-                    # Time
-                    time_sec = data["Motionless"]
-                    charging = data["Charging"]
-                    if charging == 1:
-                        time.update_data(0, "CHARGE","BATTERY")
-                    elif charging == 2:
-                        time.update_data(0, "CHARGE", "ERROR")
-                    elif charging == 3:
-                        time.update_data(1, "CHARGE", "COMPLETE")
-                    else:
-                        time.update_data(time_sec / 300, "%i" % time_sec, "SEC")
-                    center = (left + width - dial_offset_x, top + height - dial_offset_y)
-                    time.draw(center, dial_radius)
+                        tip.update_data(tip_percent / 55, "%i" % tip_percent, "PFC")
+                        tip.draw(center, dial_radius)
 
-                    # RSSI
-                    rssi = data["RSSI"]
-                    font = pygame.font.SysFont("Tahoma", 18)
-                    fs = font.render("%i"%rssi, False, (80, 80, 80))
-                    pygame.draw.rect(self._screen,(0,0,0),pygame.Rect(left,top,fs.get_width(),fs.get_height()))
-                    self._screen.blit(fs, (left,top))
+                        # Speed
+                        center = (left + dial_offset_x, top + height - dial_offset_y)
+                        speed_kmph = digiball_data["Speed KMPH"]
+                        speed_kmph = round(speed_kmph * 2) / 2  # precision 0f 0.5 mph
+                        speed_text = "%.1f" % speed_kmph
+                        if (speed_kmph > 7):
+                            speed_text = "%s+" % speed_text
+                        speed.update_data(speed_kmph / 12, speed_text, "KM/H")
+                        speed.draw(center, dial_radius)
 
+                        # Time
+                        time_sec = digiball_data["Motionless"]
+                        charging = digiball_data["Charging"]
+                        if charging == 1:
+                            time.update_data(0, "CHARGE", "BATTERY")
+                        elif charging == 2:
+                            time.update_data(0, "CHARGE", "ERROR")
+                        elif charging == 3:
+                            time.update_data(1, "CHARGE", "COMPLETE")
+                        else:
+                            time.update_data(time_sec / 300, "%i" % time_sec, "SEC")
+                        center = (left + width - dial_offset_x, top + height - dial_offset_y)
+                        time.draw(center, dial_radius)
 
-
-
-
+                # RSSI
+                if digiball_present and digicue_present:
+                    rssi_text = "%i/%i" % (digiball_data["RSSI"], digicue_data["RSSI"])
+                elif digiball_present:
+                    rssi_text = "%i" % digiball_data["RSSI"]
+                else:
+                    rssi_text = "%i" % digicue_data["RSSI"]
+                self._draw_rssi(rssi_text, left, top)

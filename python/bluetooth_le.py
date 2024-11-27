@@ -5,11 +5,38 @@ from math import *
 class BLE_async():
 
     def __init__(self):
+        self.test = True
         self._devices = None
         self._done = True
         self._last_shot_number = -1
-        self.digiball_mac_addresses = [None, None]
-        self.digicue_mac_addresses = [None, None]
+        self._digiball_mac_addresses = [None, None]
+        self._digicue_mac_addresses = [None, None]
+
+    def get_test_data(self):
+        #For testing only
+
+        data = {}
+        data["RSSI"] = -70
+        data["MAC Address"] = "mac1"
+        data["Charging"] = 0
+        data["Gyro Clipping"] = False
+        data["Motionless"] = 0
+        data["Shot Number"] = 0
+        data["Tip Percent"] = 25
+        data["Speed KMPH"] = 5
+        data["Spin RPS"] = 3
+        data["Tip Angle"] = 45
+
+        self._digiball_mac_addresses[0] = data["MAC Address"]
+
+        digiball_data = [data,None]
+        digicue_data = [data,None]
+
+        return digiball_data, digicue_data
+
+
+
+
 
     async def _scan(self):
         self._devices = await BleakScanner.discover(2.0, return_adv=True)
@@ -33,14 +60,14 @@ class BLE_async():
 
                         # Save device as target if brought close to receiver
                         rssi_range = -55
-                        if self.digiball_mac_addresses[0] is None and rssi>rssi_range:
-                            self.digiball_mac_addresses[0] = mac_address
-                        elif self.digiball_mac_addresses[1] is None and rssi>rssi_range and mac_address!=self.digiball_mac_addresses[0]:
-                            self.digiball_mac_addresses[1] = mac_address
+                        if self._digiball_mac_addresses[0] is None and rssi>rssi_range:
+                            self._digiball_mac_addresses[0] = mac_address
+                        elif self._digiball_mac_addresses[1] is None and rssi>rssi_range and mac_address!=self._digiball_mac_addresses[0]:
+                            self._digiball_mac_addresses[1] = mac_address
 
-                        if mac_address in self.digiball_mac_addresses:
+                        if mac_address in self._digiball_mac_addresses:
 
-                            if mac_address == self.digiball_mac_addresses[0]:
+                            if mac_address == self._digiball_mac_addresses[0]:
                                 player = 1
                             else:
                                 player = 2
@@ -90,14 +117,14 @@ class BLE_async():
 
                         # Save device as target if brought close to receiver
                         rssi_range = -55
-                        if self.digicue_mac_addresses[0] is None and rssi>rssi_range:
-                            self.digicue_mac_addresses[0] = mac_address
-                        elif self.digicue_mac_addresses[1] is None and rssi>rssi_range and mac_address!=self.digicue_mac_addresses[0]:
-                            self.digicue_mac_addresses[1] = mac_address
+                        if self._digicue_mac_addresses[0] is None and rssi>rssi_range:
+                            self._digicue_mac_addresses[0] = mac_address
+                        elif self._digicue_mac_addresses[1] is None and rssi>rssi_range and mac_address!=self._digicue_mac_addresses[0]:
+                            self._digicue_mac_addresses[1] = mac_address
 
-                        if mac_address in self.digicue_mac_addresses:
+                        if mac_address in self._digicue_mac_addresses:
 
-                            if mac_address == self.digicue_mac_addresses[0]:
+                            if mac_address == self._digicue_mac_addresses[0]:
                                 player = 1
                             else:
                                 player = 2
