@@ -29,7 +29,7 @@ class BLE_async():
 
         self._digiball_mac_addresses[0] = data["MAC Address"]
 
-        digiball_data = [data,None]
+        digiball_data = [None,None]
         digicue_data = [data,None]
 
         return digiball_data, digicue_data

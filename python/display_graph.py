@@ -19,8 +19,11 @@ class Graph():
         self._font = None
         self._text_label = None
         self._text_score = None
-        self._label = ''
-        self._score = ''
+        self._value_norm = None
+        self._label = None
+        self._score = None
+        self._threshold = None
+        self._enabled = None
         self._data_changed = True
         self._bars_total = 7
 
@@ -33,14 +36,18 @@ class Graph():
                 break
 
     def _update_text(self):
-        self._text_label = self._font.render(self._label, False, self._text_color)
-        self._text_score = self._font.render(self._score, False, self._text_color)
+        self._text_label = []
+        self._text_score = []
+        for i in range(0, self._bars_total):
+            self._text_label.append(self._font.render(self._label[i], False, self._text_color))
+            self._text_score.append(self._font.render(self._score[i], False, self._text_color))
 
-
-    def update_data(self, value_norm, label, score):
-        self._value_norm = value_norm
-        self._label = label
-        self._score = score
+    def update_data(self, value_norms, labels, scores, thresholds, enabled):
+        self._value_norm = value_norms
+        self._label = labels
+        self._score = scores
+        self._threshold = thresholds
+        self._enabled = enabled
         self._data_changed = True
 
     def _draw_bar(self, position):
@@ -50,9 +57,16 @@ class Graph():
         width = self._width
         height = self._height/self._bars_total - 2*pad
 
-        white = (255,255,255)
+        bd_color = (255,255,255)
         black = (0,0,0)
-        color = (255,0,0)
+
+        if not self._enabled[position]:
+            color = (25,25,25)
+            bd_color = (50,50,50)
+        elif self._value_norm[position] >= self._threshold[position]:
+            color = (0,128,0)
+        else:
+            color = (192,0,0)
 
         radius = height / 2
 
@@ -64,39 +78,31 @@ class Graph():
         rect = pygame.Rect(left + radius, top, width - 2 * radius, height)
         pygame.draw.rect(self._screen, color, rect, 0)
 
-        width_show = self._width * self._value_norm
+        width_show = self._width * self._value_norm[position]
         rect = pygame.Rect(left + width_show, top-pad/2, width-width_show, height+pad)
         pygame.draw.rect(self._screen, black, rect, 0)
+        x_thresh = self._left + self._width * self._threshold[position]
+        pygame.draw.line(self._screen, (100,100,100), (x_thresh, top), (x_thresh, top+height), 3)
         x1 = left + radius
         x2 = left + width - radius
         y = top
-        pygame.draw.line(self._screen, white, (x1, y), (x2, y), 1)
+        pygame.draw.line(self._screen, bd_color, (x1, y), (x2, y), 1)
         y = top + height
-        pygame.draw.line(self._screen, white, (x1, y), (x2, y), 1)
+        pygame.draw.line(self._screen, bd_color, (x1, y), (x2, y), 1)
         rect = pygame.Rect(left, top, 2 * radius, height)
-        pygame.draw.arc(self._screen, white, rect, pi / 2, -pi / 2, 1)
+        pygame.draw.arc(self._screen, bd_color, rect, pi / 2, -pi / 2, 1)
         rect = pygame.Rect(left + width - 2 * radius, top, 2 * radius, height)
-        pygame.draw.arc(self._screen, white, rect, -pi / 2, pi / 2, 1)
-
-        # Draw label
-        text_pos = (left + pad, top + (height - self._text_label.get_height()) / 2)
-        self._screen.blit(self._text_label, text_pos)
-
-        # Draw score
-        text_pos = (left + width - pad - self._text_score.get_width(), top + (height - self._text_score.get_height()) / 2)
-        self._screen.blit(self._text_score, text_pos)
+        pygame.draw.arc(self._screen, bd_color, rect, -pi / 2, pi / 2, 1)
 
 
+        if self._enabled[position]:
+            # Draw label text
+            text_pos = (left + pad, top + (height - self._text_label[position].get_height()) / 2)
+            self._screen.blit(self._text_label[position], text_pos)
 
-
-
-
-
-
-
-
-
-
+            # Draw score text
+            text_pos = (left + width - pad - self._text_score[position].get_width(), top + (height - self._text_score[position].get_height()) / 2)
+            self._screen.blit(self._text_score[position], text_pos)
 
     def draw(self, left, top, width, height):
         if width != self._width or left !=self._left:
@@ -113,14 +119,11 @@ class Graph():
             # Update text
             self._update_text()
 
-        for i in range(0,self._bars_total):
-            self._draw_bar(i, i/7, "Label%i"%i, "%i"%i)
-
+        if self._label is not None:
+            for i in range(0,self._bars_total):
+                self._draw_bar(i)
 
         # Frame outline
         #color = (255, 255, 255)
         #pygame.draw.rect(self._screen, color, pygame.Rect(left, top, width, height), 1)
 
-        #white = (255, 255, 255)
-        #text_pos = (center_x - self._text_surface.get_width() / 2, center_y - self._text_surface.get_height() / 2)
-        #self._screen.blit(self._text_surface, text_pos)

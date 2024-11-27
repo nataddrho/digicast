@@ -4,6 +4,7 @@ from pygame.locals import *
 import display_dial
 import display_ball
 import display_graph
+import display_straightness
 
 
 def optimize_circle_placement(center_x, center_y, ball_radius):
@@ -70,6 +71,7 @@ class Scaffold():
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_graph.Graph(self._screen))
+            objects.append(display_straightness.Plot(self._screen))
             self._frame_objects.append(objects)
 
     def update_size(self, width, height):
@@ -138,7 +140,7 @@ class Scaffold():
             center_y = top + height / 2
             ball_radius_optimized = min(width_digiball, height) / 2 - self._ball_pad
 
-            ball, spin, tip, speed, time, graph = self._frame_objects[frame]
+            ball, spin, tip, speed, time, graph, straightness = self._frame_objects[frame]
 
             if frame == 0:
                 ret = optimize_circle_placement(center_x, center_y, ball_radius_optimized)
@@ -162,7 +164,7 @@ class Scaffold():
             if frame == 0 and not device_found:
                 # Message
                 font = pygame.font.SysFont("Tahoma", 48)
-                fs = font.render('Move DigiBall/DigiCue close to receiver to connect...', False, (255, 255, 255))
+                fs = font.render('Touch device to receiver to connect...', False, (255, 255, 255))
                 text_pos = (center_x - fs.get_width() / 2,
                             center_y - fs.get_height() / 2)
                 self._screen.blit(fs, text_pos)
@@ -173,28 +175,29 @@ class Scaffold():
 
                     if digicue_present:
                         # DigiBall Graph
-                        graph.update_data(0.5, "Hello")
+                        labels = ["Finish","Straightness","Tip Steer","Follow Through","Jab","Backstroke Pause","Shot Interval"]
+                        values_norm = [.1,.2,.3,.4,.5,.6,.7]
+                        scores = ["1","2","3","4","5","6","7"]
+                        thresholds = [.3,.3,.3,.3,.3,.3,.3]
+                        enabled = [True,True,True,True,True,True,True]
+
+                        graph.update_data(values_norm, labels, scores, thresholds, enabled)
                         graph.draw(left + width_digiball + 10, top + 10, width_digicue - 20, height - 20)
 
-                    if digiball_present:
+                    if not digiball_present:
+
+                        center = (center_x, center_y)
+                        straightness.draw(center, ball_radius_optimized, 45, 0.06, 0.075)
+
+                    else:
 
                         tip_percent = digiball_data["Tip Percent"]
                         tip_percent = round(tip_percent / 5) * 5  # precision of 5 percent
                         tip_angle = digiball_data["Tip Angle"]
 
-                        if digicue_present:
-                            # Ball towards left between complication dials
-                            #radius = (width - 4*dial_offset_x)/4
-                            #center = (center_x - radius, center_y)
-                            #ball.draw(center, radius, tip_angle, tip_percent)
-                            center = (center_x, center_y)
-                            ball.draw(center, ball_radius_optimized, tip_angle, tip_percent)
-                        else:
-                            # Ball in center, optimized
-                            center = (center_x, center_y)
-                            ball.draw(center, ball_radius_optimized, tip_angle, tip_percent)
+                        center = (center_x, center_y)
+                        ball.draw(center, ball_radius_optimized, tip_angle, tip_percent)
 
-                    if digiball_present:
                         # Spin
                         center = (left + dial_offset_x, top + dial_offset_y)
                         spin_rps = digiball_data["Spin RPS"]
