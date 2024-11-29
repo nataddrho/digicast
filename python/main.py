@@ -57,7 +57,8 @@ def gui_main(ball_type):
                     digicue_data[0] is not None or digicue_data[1] is not None):
 
                 # Update display information
-                scaffold.update_data(digiball_data, digicue_data)
+                force_screen_clear = ble.check_for_new_device()
+                scaffold.update_data(digiball_data, digicue_data, force_screen_clear)
 
             thread = threading.Thread(target=ble.async_task, args=(q,))
             thread.start()

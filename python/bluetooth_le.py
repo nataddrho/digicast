@@ -11,6 +11,14 @@ class BLE_async():
         self._last_shot_number = -1
         self._digiball_mac_addresses = [None, None]
         self._digicue_mac_addresses = [None, None]
+        self._digiball_player_data = [None, None]
+        self._digicue_player_data = [None, None]
+        self._new_device = False
+
+    def check_for_new_device(self): # Returns true if a new device was found. Clear screen if true
+        new = self._new_device
+        self._new_device = False
+        return new
 
     def get_test_data(self):
         #For testing only
@@ -69,8 +77,6 @@ class BLE_async():
 
     def _digiball_parser(self, devices):
 
-        player_data = [None, None]
-
         for mac_address in devices:
             d = devices[mac_address][1]
             rssi = d.rssi
@@ -122,11 +128,12 @@ class BLE_async():
                                 data["Tip Angle"] = spin_degrees
 
                                 #Post data
-                                player_data[player-1] = data
-        return player_data
-    def _digicue_parser(self, devices):
+                                if self._digiball_player_data[player-1] is None:
+                                    self._new_device = True
+                                self._digiball_player_data[player-1] = data
 
-        player_data = [None, None]
+
+    def _digicue_parser(self, devices):
 
         for mac_address in devices:
             d = devices[mac_address][1]
@@ -135,8 +142,6 @@ class BLE_async():
             for manuf_id in manuf:
 
                 if manuf_id == 0xDE03: #NRLLC reversed
-
-
 
                     mdata = manuf[manuf_id]
 
@@ -248,17 +253,17 @@ class BLE_async():
                                 data["Shot Interval Enabled"] = aconf0&1==1
 
                                 #Post data
-                                player_data[player-1] = data
-
-        return player_data
+                                if self._digicue_player_data[player-1] is None:
+                                    self._new_device = True
+                                self._digicue_player_data[player-1] = data
 
 
     def async_task(self,q):
         try:
             asyncio.run(self._scan())
-            digiball_data = self._digiball_parser(self._devices)
-            digicue_data = self._digicue_parser(self._devices)
-            q.put((digiball_data, digicue_data))
+            self._digiball_parser(self._devices)
+            self._digicue_parser(self._devices)
+            q.put((self._digiball_player_data, self._digicue_player_data))
         except:
             pass
 

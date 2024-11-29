@@ -78,9 +78,9 @@ class Scaffold():
         self._width = width
         self._height = height
 
-    def update_data(self, digiball_data, digicue_data):
+    def update_data(self, digiball_data, digicue_data, force_screen_clear=False):
 
-        clearScreen = False
+        clearScreen = force_screen_clear
         for i in range(0, 2):
             if self._digiball_data[i] is None and digiball_data[i] is not None:
                 clearScreen = True
