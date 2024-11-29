@@ -202,17 +202,15 @@ class BLE_async():
                                 if tmp > 50:
                                     tmp = 50
                                 score_straightness = (50-tmp) / 5.0
-                                score_interval = 10 * shot_timer / 255;
+                                score_interval = shot_timer / 255;
 
-                                tmp = (aconf2 >> 2) & 3
-                                if tmp == 0:
-                                    straightness_threshold = 10-1.07
-                                elif tmp == 1:
-                                    straightness_threshold = 10-2.14
-                                elif tmp == 2:
-                                    straightness_threshold = 10-4.29
-                                else:
-                                    straightness_threshold = 10-7.5
+                                straightness_t = [0.893, 0.785, 0.571, 0.25]
+                                steering_t = straightness_t
+                                follow_t = [.4, .7, .9, 1]
+                                jab_t = [.8, .6, .4, .2]
+                                backstroke_t = [.1, .2, .5, 1]
+                                interval_t = [0.0382, 0.0612, 0.0919, 0.114]
+                                finish_t = [1/3, 1.5/3, 2/3, 2.5/3]
 
                                 data = {}
                                 data["RSSI"] = rssi
@@ -221,32 +219,32 @@ class BLE_async():
                                 #Parse digicue data here
                                 data["Straightness"] = score_straightness/10
                                 data["Straightness Text"] = "%.1f"%score_straightness
-                                data["Straightness Threshold"] = straightness_threshold/10
+                                data["Straightness Threshold"] = straightness_t[(aconf2>>2)&3]
                                 data["Straightness Enabled"] = (aconf0>>5)&1==1
                                 data["Straightness Angle"] = impact_angle
                                 data["Finish"] = score_finish/3
                                 data["Finish Text"] = "%.1fs"%(score_finish)
-                                data["Finish Threshold"] = 0.3
+                                data["Finish Threshold"] = finish_t[(aconf2>>6)&3]
                                 data["Finish Enabled"] = (aconf0>>7)&1==1
                                 data["Tip Steer"] = score_steering/10
                                 data["Tip Steer Text"] = "%.1f"%score_steering
-                                data["Tip Steer Threshold"] = 0.3
+                                data["Tip Steer Threshold"] = steering_t[aconf2&3]
                                 data["Tip Steer Enabled"] = (aconf0>>4)&1==1
                                 data["Follow Through"] = score_follow/10
                                 data["Follow Through Text"] = "%.1f"%score_follow
-                                data["Follow Through Threshold"] = 0.3
+                                data["Follow Through Threshold"] = follow_t[(aconf1>>6)&3]
                                 data["Follow Through Enabled"] = (aconf0>>3)&1==1
                                 data["Jab"] = score_jab/10
                                 data["Jab Text"] = "%.1f"%score_jab
-                                data["Jab Threshold"] = 0.3
+                                data["Jab Threshold"] = jab_t[(aconf1>>4)&3]
                                 data["Jab Enabled"] = (aconf0>>2)&1==1
                                 data["Backstroke Pause"] = score_backstroke
                                 data["Backstroke Pause Text"] = "%.1fs"%score_backstroke
-                                data["Backstroke Pause Threshold"] = 0.3
+                                data["Backstroke Pause Threshold"] = backstroke_t[(aconf1>>2)&3]
                                 data["Backstroke Pause Enabled"] = (aconf0>>1)&1==1
-                                data["Shot Interval"] = score_interval/10
-                                data["Shot Interval Text"] = "%is"%(score_interval/10 * 255)
-                                data["Shot Interval Threshold"] = 0.3
+                                data["Shot Interval"] = score_interval
+                                data["Shot Interval Text"] = "%is"%(shot_timer * 0.512)
+                                data["Shot Interval Threshold"] = interval_t[aconf1&3]
                                 data["Shot Interval Enabled"] = aconf0&1==1
 
                                 #Post data
