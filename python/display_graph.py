@@ -89,9 +89,9 @@ class Graph():
         pygame.draw.line(self._screen, bd_color, (x1, y), (x2, y), 1)
         y = top + height
         pygame.draw.line(self._screen, bd_color, (x1, y), (x2, y), 1)
-        rect = pygame.Rect(left, top, 2 * radius, height)
+        rect = pygame.Rect(left, top, 2 * radius, height+1)
         pygame.draw.arc(self._screen, bd_color, rect, pi / 2, -pi / 2, 1)
-        rect = pygame.Rect(left + width - 2 * radius, top, 2 * radius, height)
+        rect = pygame.Rect(left + width - 2 * radius, top, 2 * radius, height+1)
         pygame.draw.arc(self._screen, bd_color, rect, -pi / 2, pi / 2, 1)
 
 

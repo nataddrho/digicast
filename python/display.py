@@ -175,19 +175,29 @@ class Scaffold():
 
                     if digicue_present:
                         # DigiBall Graph
-                        labels = ["Finish","Straightness","Tip Steer","Follow Through","Jab","Backstroke Pause","Shot Interval"]
-                        values_norm = [.1,.2,.3,.4,.5,.6,.7]
-                        scores = ["1","2","3","4","5","6","7"]
-                        thresholds = [.3,.3,.3,.3,.3,.3,.3]
-                        enabled = [True,True,True,True,True,True,True]
+                        labels = ["Straightness","Finish","Tip Steer","Follow Through","Jab","Backstroke Pause","Shot Interval"]
+                        values_norm = len(labels)*[None]
+                        scores = len(labels)*[None]
+                        thresholds = len(labels)*[None]
+                        enabled = len(labels)*[None]
+                        for i in range(0,len(labels)):
+                            label = labels[i]
+                            values_norm[i] = digicue_data[label]
+                            scores[i] = "%.1f"%digicue_data[label]
+                            thresholds[i] = digicue_data["%s Threshold"%label]
+                            enabled[i] = digicue_data["%s Enabled"%label]
 
                         graph.update_data(values_norm, labels, scores, thresholds, enabled)
                         graph.draw(left + width_digiball + 10, top + 10, width_digicue - 20, height - 20)
 
                     if not digiball_present:
 
+                        magnitude = digicue_data["Straightness"]
+                        angle = digicue_data["Straightness Angle"]
+                        threshold = 1-digicue_data["Straightness Threshold"]
+
                         center = (center_x, center_y)
-                        straightness.draw(center, ball_radius_optimized, 45, 0.06, 0.075)
+                        straightness.draw(center, ball_radius_optimized, angle, magnitude, threshold)
 
                     else:
 

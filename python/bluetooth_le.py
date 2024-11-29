@@ -26,6 +26,28 @@ class BLE_async():
         data["Speed KMPH"] = 5
         data["Spin RPS"] = 3
         data["Tip Angle"] = 45
+        data["Straightness"] = 0.5
+        data["Straightness Angle"] = 45
+        data["Straightness Threshold"] = 0.2
+        data["Straightness Enabled"] = True
+        data["Finish"] = 0.1
+        data["Finish Threshold"] = 0.3
+        data["Finish Enabled"] = True
+        data["Tip Steer"] = 0.2
+        data["Tip Steer Threshold"] = 0.3
+        data["Tip Steer Enabled"] = True
+        data["Follow Through"] = 0.3
+        data["Follow Through Threshold"] = 0.3
+        data["Follow Through Enabled"] = True
+        data["Jab"] = 0.4
+        data["Jab Threshold"] = 0.3
+        data["Jab Enabled"] = True
+        data["Backstroke Pause"] = 0.5
+        data["Backstroke Pause Threshold"] = 0.3
+        data["Backstroke Pause Enabled"] = True
+        data["Shot Interval"] = 0.6
+        data["Shot Interval Threshold"] = 0.3
+        data["Shot Interval Enabled"] = True
 
         self._digiball_mac_addresses[0] = data["MAC Address"]
 

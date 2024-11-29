@@ -36,9 +36,11 @@ class Plot():
 
 
 
-        x = center_x + radius * value_norm * math.sin(180 / pi * angle)
-        y = center_y + radius * value_norm * -math.cos(180 / pi * angle)
+        x = center_x + radius * value_norm * -math.sin(180 / pi * angle)
+        y = center_y + radius * value_norm * math.cos(180 / pi * angle)
 
-        pygame.draw.line(self._screen, (0,255,255), center, (x,y), 5)
+        color = (0,255,255)
+        pygame.draw.line(self._screen, color, center, (x,y), 5)
+
 
 
