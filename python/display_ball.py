@@ -25,7 +25,7 @@ class Ball():
         surface.blit(shape_surf, rect)
 
 
-    def draw(self, center, radius, tip_angle=0, tip_percent=0):
+    def draw(self, center, radius, tip_angle=0, tip_percent=0, straightness=None):
         if radius != self._radius or center!=self._center:
             self._radius = radius
             self._center = center
@@ -89,13 +89,34 @@ class Ball():
         pos = (x-tr,y-tr,2*tr,2*tr)
         self._draw_circle_alpha(self._screen, (0, 0, 0, alpha), pos, tr)
 
-        # Draw tip contact point
-        color = (0, 255, 255)
-        x = center_x + self._radius * ax * r1 / ball_radius
-        y = center_y + self._radius * ay * r1 / ball_radius
+        # Calculate tip contact point
+        x_contact = center_x + self._radius * ax * r1 / ball_radius
+        y_contact = center_y + self._radius * ay * r1 / ball_radius
         tr /= 10
         if tr<3:
             tr = 3
-        pygame.draw.circle(self._screen, color, (x, y), tr)
+
+        # Draw tip contact point
+        color = (0, 255, 255)
+        pygame.draw.circle(self._screen, color, (x_contact, y_contact), tr)
+
+        #Draw digicue straightness
+        if straightness is not None:
+            magnitude, angle, threshold = straightness
+            color = (0,0,255)
+            str_r = self._radius * magnitude
+            str_x = x_contact + str_r * sin(pi/180 * angle)
+            str_y = y_contact + str_r * -cos(pi/180 * angle)
+
+            pygame.draw.line(self._screen, color, (x_contact, y_contact), (str_x, str_y), 3)
+            for i in range(-1,2,2):
+                arrow_r = 4*tr
+                if arrow_r > str_r/3:
+                    arrow_r = str_r/3
+                x = x_contact + arrow_r * sin(pi/180 * (angle + 30*i))
+                y = y_contact + arrow_r * -cos(pi/180 * (angle + 30*i))
+                pygame.draw.line(self._screen, color, (x_contact, y_contact), (x, y), 3)
+
+
 
 

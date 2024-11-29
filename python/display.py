@@ -140,7 +140,7 @@ class Scaffold():
             center_y = top + height / 2
             ball_radius_optimized = min(width_digiball, height) / 2 - self._ball_pad
 
-            ball, spin, tip, speed, time, graph, straightness = self._frame_objects[frame]
+            ball, spin, tip, speed, time, graph, plot = self._frame_objects[frame]
 
             if frame == 0:
                 ret = optimize_circle_placement(center_x, center_y, ball_radius_optimized)
@@ -174,6 +174,14 @@ class Scaffold():
                 if digiball_present or digicue_present:
 
                     if digicue_present:
+                        magnitude = 1 - digicue_data["Straightness"]
+                        angle = digicue_data["Straightness Angle"]
+                        threshold = 1 - digicue_data["Straightness Threshold"]
+                        straightness = (magnitude, angle, threshold)
+                    else:
+                        straightness = None
+
+                    if digicue_present:
                         # DigiBall Graph
                         labels = ["Straightness","Finish","Tip Steer","Follow Through","Jab","Backstroke Pause","Shot Interval"]
                         values_norm = len(labels)*[None]
@@ -183,7 +191,7 @@ class Scaffold():
                         for i in range(0,len(labels)):
                             label = labels[i]
                             values_norm[i] = digicue_data[label]
-                            scores[i] = "%.1f"%digicue_data[label]
+                            scores[i] = digicue_data["%s Text"%label]
                             thresholds[i] = digicue_data["%s Threshold"%label]
                             enabled[i] = digicue_data["%s Enabled"%label]
 
@@ -192,12 +200,8 @@ class Scaffold():
 
                     if not digiball_present:
 
-                        magnitude = digicue_data["Straightness"]
-                        angle = digicue_data["Straightness Angle"]
-                        threshold = 1-digicue_data["Straightness Threshold"]
-
                         center = (center_x, center_y)
-                        straightness.draw(center, ball_radius_optimized, angle, magnitude, threshold)
+                        plot.draw(center, ball_radius_optimized, straightness)
 
                     else:
 
@@ -206,7 +210,7 @@ class Scaffold():
                         tip_angle = digiball_data["Tip Angle"]
 
                         center = (center_x, center_y)
-                        ball.draw(center, ball_radius_optimized, tip_angle, tip_percent)
+                        ball.draw(center, ball_radius_optimized, tip_angle, tip_percent, straightness)
 
                         # Spin
                         center = (left + dial_offset_x, top + dial_offset_y)
