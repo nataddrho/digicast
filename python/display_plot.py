@@ -15,6 +15,9 @@ class Plot():
         magnitude, angle, threshold = straightness
         center_x, center_y = center
 
+        #Clear screen
+        pygame.draw.circle(self._screen, (0,0,0), center, radius+2, 0)
+
         if (magnitude<=threshold):
             color = (0, 128, 0)
         else:

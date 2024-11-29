@@ -4,7 +4,7 @@ from pygame.locals import *
 import display_dial
 import display_ball
 import display_graph
-import display_straightness
+import display_plot
 
 
 def optimize_circle_placement(center_x, center_y, ball_radius):
@@ -71,7 +71,7 @@ class Scaffold():
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_graph.Graph(self._screen))
-            objects.append(display_straightness.Plot(self._screen))
+            objects.append(display_plot.Plot(self._screen))
             self._frame_objects.append(objects)
 
     def update_size(self, width, height):
@@ -183,7 +183,7 @@ class Scaffold():
 
                     if digicue_present:
                         # DigiBall Graph
-                        labels = ["Straightness","Finish","Tip Steer","Follow Through","Jab","Backstroke Pause","Shot Interval"]
+                        labels = ["Finish","Straightness","Tip Steer","Follow Through","Jab","Backstroke Pause","Shot Interval"]
                         values_norm = len(labels)*[None]
                         scores = len(labels)*[None]
                         thresholds = len(labels)*[None]
