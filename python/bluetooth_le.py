@@ -168,7 +168,7 @@ class BLE_async():
                             aconf3 = mdata[5]
                             data_type = (config>>3)&3
 
-                            if data_type==1:
+                            if data_type<=1:
 
                                 alert0 = mdata[6]
                                 alert1 = mdata[7]

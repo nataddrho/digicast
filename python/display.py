@@ -123,7 +123,11 @@ class Scaffold():
             digiball_data = self._digiball_data[frame]
             digicue_data = self._digicue_data[frame]
             digiball_present = digiball_data is not None
+            if digiball_present:
+                digiball_present = "MAC Address" in digiball_data
             digicue_present = digicue_data is not None
+            if digicue_present:
+                digicue_present = "MAC Address" in digicue_data
 
             width_digiball = self._width / self._frames
             width_digicue = 0
@@ -135,7 +139,7 @@ class Scaffold():
                 width_digicue = width_digiball
 
             height = self._height
-            left = width_digiball * frame
+            left = self._width/2 * frame
             top = 0
             center_x = left + width_digiball / 2
             center_y = top + height / 2
@@ -213,7 +217,7 @@ class Scaffold():
 
                         #Draw logo
                         logo_width = 2 * dial_offset_x
-                        self._digicue_logo.draw(5, 5, logo_width - 10)
+                        self._digicue_logo.draw(5+left, 5, logo_width - 10)
 
                     else:
 
@@ -265,6 +269,7 @@ class Scaffold():
 
 
                 # RSSI
+                rssi_text = "ERROR"
                 if digiball_present and digicue_present:
                     rssi_text = "%i/%i" % (digiball_data["RSSI"], digicue_data["RSSI"])
                 elif digiball_present:

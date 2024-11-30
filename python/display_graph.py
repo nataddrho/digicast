@@ -32,7 +32,10 @@ class Graph():
             font = pygame.font.SysFont(self._font_name, i)
             test = font.render('A', False, self._text_color)
             if test.get_height() > self._height/16:
-                self._font = pygame.font.SysFont(self._font_name, i - 1)
+                j = i*0.5
+                if j<3:
+                    j=3
+                self._font = pygame.font.SysFont(self._font_name, int(j))
                 break
 
     def _update_text(self):
@@ -82,7 +85,8 @@ class Graph():
         rect = pygame.Rect(left + width_show, top-pad/2, width-width_show, height+pad)
         pygame.draw.rect(self._screen, black, rect, 0)
         x_thresh = self._left + self._width * self._threshold[position]
-        pygame.draw.line(self._screen, (100,100,100), (x_thresh, top), (x_thresh, top+height), 3)
+        if self._enabled[position]:
+            pygame.draw.line(self._screen, (100,100,100), (x_thresh, top), (x_thresh, top+height), 3)
         x1 = left + radius
         x2 = left + width - radius
         y = top
