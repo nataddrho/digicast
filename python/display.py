@@ -6,6 +6,7 @@ import display_ball
 import display_graph
 import display_plot
 import display_image
+import version
 
 def optimize_circle_placement(center_x, center_y, ball_radius):
     Z = sqrt(center_x ** 2 + center_y ** 2)
@@ -175,12 +176,20 @@ class Scaffold():
                 self._digiball_logo.draw(self._width-logo_width-5, 5, logo_width-10)
                 self._aramith_logo.draw((self._width-logo_width)/2+5,5,logo_width-10)
 
-                # Message
-                font = pygame.font.SysFont("Tahoma", 48)
+                # Instructions
+                font = pygame.font.SysFont("Tahoma", 56)
                 fs = font.render('Touch device to receiver to connect...', True, (255, 255, 255))
                 text_pos = (center_x - fs.get_width() / 2,
                             center_y - fs.get_height() / 2)
                 pygame.draw.rect(self._screen,(0,0,0),(text_pos[0],text_pos[1],fs.get_width(),fs.get_height()))
+                self._screen.blit(fs, text_pos)
+
+                # Version
+                font = pygame.font.SysFont("Tahoma", 40)
+                fs = font.render("DigiCast\u2122 version %s (%s)"%(version.version, version.date), True, (255, 255, 255))
+                text_pos = (center_x - fs.get_width() / 2,
+                            self._height - 3* fs.get_height() / 2)
+                pygame.draw.rect(self._screen, (0, 0, 0), (text_pos[0], text_pos[1], fs.get_width(), fs.get_height()))
                 self._screen.blit(fs, text_pos)
 
             else:

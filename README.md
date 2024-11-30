@@ -4,15 +4,17 @@ A light-weight Python-based application for Raspberry Pi Zero 2 W (or any other 
 
 The DigiBall is a digital billiards ball that measures the accuracy of your stroke so that you can compare it to your intentions. Novice players may not give any thought to the importance of where on the face of the cue ball they hit it, as long as the cue ball makes the object ball go in the pocket. But for any high level of play, it is extremely important. Hitting the ball too much on one side of center will cause it to deflect in the opposite direction of your aiming line, resulting in a miss. Advanced players know this, and use the deviation in combination with deliberate tip offset to both pocket the object ball and spin the cue ball off of the rails into desired positions. But again, deviations in the accuracy of the deliberate off-center tip hits cause poor results. By obtaining real time feedback on where you actually hit the ball and comparing it to where you intended to hit the ball, you can make permanent adjustments quickly.
 
+Version 1.1.0: 11/30/2024 - Now works with the DigiCue!
+
 See www.digicue.net for more information.
 
 ### Requirements:
 
 - Raspberry Pi Zero 2 W
-- Micro-SD card (16 GB or greater)
+- Micro-SD card (16 GB or greater, 32 GB recommended)
 - PC with a micro-SD card reader or USB reader
 - Micro HDMI to HDMI cable
-- 5VDC Power Adapter (greater than 1 amp)
+- 5VDC Power Adapter (5W or greater)
 
 ### Installation:
 
@@ -72,7 +74,7 @@ The signal strength (RSSI in dBm) is shown as faint grey numbers at the upper co
 
 ![alt text](https://github.com/nataddrho/digiball-pi/blob/master/pictures/rssi.jpg?raw=true)
 
-The Raspberry PI Zero 2 W can be ordered from many locations including Amazon, DigiKey, or raspberrypi.com for about $15 each. Many vendors make kits with cases and adapters.
+The Raspberry PI Zero 2 W can be ordered from many locations including Amazon, DigiKey, Mouser, etc. See list of distributors at raspberrypi.com. Many vendors make kits with cases and adapters.
 
 ![alt text](https://github.com/nataddrho/digiball-pi/blob/master/pictures/zero-2.jpg?raw=true)
 
