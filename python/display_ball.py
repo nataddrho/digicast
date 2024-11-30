@@ -30,7 +30,7 @@ class Ball():
             self._radius = radius
             self._center = center
             pixels = 2*radius
-            self._ball_image_scaled = pygame.transform.scale(self._ball_image, (pixels,pixels))
+            self._ball_image_scaled = pygame.transform.smoothscale(self._ball_image, (pixels,pixels))
 
         # Draw ball image
         center_x, center_y = self._center

@@ -30,7 +30,7 @@ class Graph():
     def _update_font_size(self):
         for i in range(1, 200, 1):
             font = pygame.font.SysFont(self._font_name, i)
-            test = font.render('A', False, self._text_color)
+            test = font.render('A', True, self._text_color)
             if test.get_height() > self._height/16:
                 j = i*0.5
                 if j<3:
@@ -42,8 +42,8 @@ class Graph():
         self._text_label = []
         self._text_score = []
         for i in range(0, self._bars_total):
-            self._text_label.append(self._font.render(self._label[i], False, self._text_color))
-            self._text_score.append(self._font.render(self._score[i], False, self._text_color))
+            self._text_label.append(self._font.render(self._label[i], True, self._text_color))
+            self._text_score.append(self._font.render(self._score[i], True, self._text_color))
 
     def update_data(self, value_norms, labels, scores, thresholds, enabled):
         self._value_norm = value_norms

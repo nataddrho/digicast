@@ -25,7 +25,7 @@ class Dial():
     def _update_font_size(self):
         for i in range(1, 200, 1):
             font = pygame.font.SysFont(self._font_name, i)
-            test = font.render('00.00', False, self._text_color)
+            test = font.render('00.00', True, self._text_color)
             if test.get_width() > self._radius:
                 self._font_large = pygame.font.SysFont(self._font_name, i - 1)
                 s = int((i-1)*.5)
@@ -35,10 +35,10 @@ class Dial():
                 break
 
     def _update_large_text(self):
-        self._large_text_surface = self._font_large.render(self._large_text, False, self._text_color)
+        self._large_text_surface = self._font_large.render(self._large_text, True, self._text_color)
 
     def _update_small_text(self):
-        self._small_text_surface = self._font_small.render(self._small_text, False, self._text_color)
+        self._small_text_surface = self._font_small.render(self._small_text, True, self._text_color)
 
     def _draw_dial_arc(self,value_norm):
         zero_deg = -90

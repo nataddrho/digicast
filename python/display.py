@@ -106,9 +106,11 @@ class Scaffold():
     def _draw_rssi(self, rssi_text, frame_left, frame_top):
         # RSSI
         font = pygame.font.SysFont("Tahoma", 18)
-        fs = font.render(rssi_text, False, (80, 80, 80))
-        pygame.draw.rect(self._screen, (0, 0, 0), pygame.Rect(frame_left, frame_top-fs.get_height(), fs.get_width(), fs.get_height()))
-        self._screen.blit(fs, (frame_left, frame_top-fs.get_height()))
+        fs = font.render(rssi_text, True, (80, 80, 80))
+        top = frame_left
+        left = frame_top-fs.get_height()
+        pygame.draw.rect(self._screen, (0, 0, 0), pygame.Rect(top, left, fs.get_width(), fs.get_height()))
+        self._screen.blit(fs, (top, left))
 
     def draw(self):
         player1_digiball = self._digiball_data[0] is not None
@@ -175,9 +177,10 @@ class Scaffold():
 
                 # Message
                 font = pygame.font.SysFont("Tahoma", 48)
-                fs = font.render('Touch device to receiver to connect...', False, (255, 255, 255))
+                fs = font.render('Touch device to receiver to connect...', True, (255, 255, 255))
                 text_pos = (center_x - fs.get_width() / 2,
                             center_y - fs.get_height() / 2)
+                pygame.draw.rect(self._screen,(0,0,0),(text_pos[0],text_pos[1],fs.get_width(),fs.get_height()))
                 self._screen.blit(fs, text_pos)
 
             else:

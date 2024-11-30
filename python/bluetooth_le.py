@@ -5,7 +5,7 @@ from math import *
 class BLE_async():
 
     def __init__(self):
-        self.test = False #turn on and off here to test graphic display
+        self.test = False #Turn on to test graphical display
         self._devices = None
         self._done = True
         self._last_shot_number = -1
@@ -66,7 +66,7 @@ class BLE_async():
 
         self._digiball_mac_addresses[0] = data["MAC Address"]
 
-        digiball_data = [None,None]
+        digiball_data = [data,None]
         digicue_data = [data,None]
 
         return digiball_data, digicue_data

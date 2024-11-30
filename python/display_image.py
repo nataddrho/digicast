@@ -12,6 +12,7 @@ class Image():
 
     def draw(self, left, top, width):
         height = width * self._height / self._width
-        image_scaled = pygame.transform.scale(self._image, (width,height))
+        image_scaled = pygame.transform.smoothscale(self._image, (width,height))
+        pygame.draw.rect(self._screen,(0,0,0),(left,top,image_scaled.get_width(), image_scaled.get_height()))
         self._screen.blit(image_scaled, (left, top))
 
