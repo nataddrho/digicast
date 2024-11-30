@@ -46,11 +46,8 @@ class Scaffold():
         self._ball_pad = 25
         self._ball_type = ball_type
 
-        #self._width = 1920
-        #self._height = 1080
-
-        self._width = 800
-        self._height = 600
+        self._width = 1920
+        self._height = 1080
 
         self._digiball_data = [None, None]
         self._digicue_data = [None, None]
