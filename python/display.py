@@ -5,7 +5,7 @@ import display_dial
 import display_ball
 import display_graph
 import display_plot
-
+import display_image
 
 def optimize_circle_placement(center_x, center_y, ball_radius):
     Z = sqrt(center_x ** 2 + center_y ** 2)
@@ -62,6 +62,10 @@ class Scaffold():
         # Clear screen
         self._screen.fill((0, 0, 0))
 
+        self._digicue_logo = display_image.Image(self._screen, "assets/digicue_blue_logo.png")
+        self._digiball_logo = display_image.Image(self._screen, "assets/digiball_logo.png")
+        self._aramith_logo = display_image.Image(self._screen, "assets/aramith_logo.png")
+
         self._frame_objects = []
         for i in range(0, 2):
             objects = []
@@ -106,8 +110,8 @@ class Scaffold():
         # RSSI
         font = pygame.font.SysFont("Tahoma", 18)
         fs = font.render(rssi_text, False, (80, 80, 80))
-        pygame.draw.rect(self._screen, (0, 0, 0), pygame.Rect(frame_left, frame_top, fs.get_width(), fs.get_height()))
-        self._screen.blit(fs, (frame_left, frame_top))
+        pygame.draw.rect(self._screen, (0, 0, 0), pygame.Rect(frame_left, frame_top-fs.get_height(), fs.get_width(), fs.get_height()))
+        self._screen.blit(fs, (frame_left, frame_top-fs.get_height()))
 
     def draw(self):
         player1_digiball = self._digiball_data[0] is not None
@@ -162,6 +166,12 @@ class Scaffold():
             """
 
             if frame == 0 and not device_found:
+                #Logos
+                logo_width = 2 * dial_offset_x
+                self._digicue_logo.draw(5,5,logo_width-10)
+                self._digiball_logo.draw(self._width-logo_width-5, 5, logo_width-10)
+                self._aramith_logo.draw((self._width-logo_width)/2+5,5,logo_width-10)
+
                 # Message
                 font = pygame.font.SysFont("Tahoma", 48)
                 fs = font.render('Touch device to receiver to connect...', False, (255, 255, 255))
@@ -200,8 +210,13 @@ class Scaffold():
 
                     if not digiball_present:
 
+                        #Draw plot
                         center = (center_x, center_y)
                         plot.draw(center, ball_radius_optimized, straightness)
+
+                        #Draw logo
+                        logo_width = 2 * dial_offset_x
+                        self._digicue_logo.draw(5, 5, logo_width - 10)
 
                     else:
 
@@ -259,4 +274,4 @@ class Scaffold():
                     rssi_text = "%i" % digiball_data["RSSI"]
                 else:
                     rssi_text = "%i" % digicue_data["RSSI"]
-                self._draw_rssi(rssi_text, left, top)
+                self._draw_rssi(rssi_text, left, top+height)
