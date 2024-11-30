@@ -1,4 +1,5 @@
 import pygame
+from pygame import gfxdraw
 from pygame.locals import *
 from math import *
 
@@ -20,9 +21,9 @@ class Ball():
     def _draw_circle_alpha(self, surface, color, rect, radius):
         shape_surf = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
         #pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
-
         pygame.draw.circle(shape_surf,color,(radius, radius), radius)
         surface.blit(shape_surf, rect)
+
 
 
     def draw(self, center, radius, tip_angle=0, tip_percent=0, straightness=None):
@@ -34,12 +35,16 @@ class Ball():
 
         # Draw ball image
         center_x, center_y = self._center
+        center = self._center
         pos = (center_x-radius, center_y-radius)
         self._screen.blit(self._ball_image_scaled, pos)
 
-        # Draw ball grid
+        # Clip ball outline
         color = (0,0,0)
         pygame.draw.circle(self._screen, color, center, radius+25, 25)
+        # Anti-alias ball outline
+        gfxdraw.aacircle(self._screen, int(center_x), int(center_y), int(radius), color)
+
         for i in range(1,7):
             pygame.draw.circle(self._screen, color, center, radius*i/10, 1)
         for i in range(0,12):
