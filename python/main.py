@@ -6,9 +6,10 @@ import threading
 import queue
 import sys
 import bluetooth_le
+import version
 
 
-def gui_main(ball_type):
+def gui_main():
 
     ble = bluetooth_le.BLE_async()
     q = queue.Queue()
@@ -20,7 +21,7 @@ def gui_main(ball_type):
     pygame.init()
     pygame.font.init()
 
-    scaffold = display.Scaffold(ball_type)
+    scaffold = display.Scaffold()
 
     pygame.mouse.set_visible(False)
 
@@ -70,15 +71,6 @@ def gui_main(ball_type):
 
 
 if __name__ == '__main__':
-
-    if "carom" in sys.argv:
-        ball_type = "carom"
-    elif "snooker" in sys.argv:
-        ball_type = "snooker"
-    else:
-        ball_type = "pool"
-
-    print("Nathan Rhoades LLC, 11/9/2024")
-    print("digiball-pi: %s" % ball_type)
-    gui_main(ball_type)
+    print("digiball-pi: Version %s (%s)"%(version.version, version.date))
+    gui_main()
 

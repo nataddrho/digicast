@@ -41,11 +41,10 @@ def optimize_circle_placement(center_x, center_y, ball_radius):
 
 class Scaffold():
 
-    def __init__(self, ball_type):
+    def __init__(self):
 
         self._frames = 1  # can be 1 or 2
         self._ball_pad = 25
-        self._ball_type = ball_type
 
         self._width = 1920
         self._height = 1080
@@ -67,7 +66,7 @@ class Scaffold():
         self._frame_objects = []
         for i in range(0, 2):
             objects = []
-            objects.append(display_ball.Ball(self._screen, self._ball_type, i == 1))
+            objects.append(display_ball.Ball(self._screen))
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_dial.Dial(self._screen))
             objects.append(display_dial.Dial(self._screen))
@@ -233,12 +232,18 @@ class Scaffold():
 
                     else:
 
+                        # Draw ball
                         tip_percent = digiball_data["Tip Percent"]
                         tip_percent = round(tip_percent / 5) * 5  # precision of 5 percent
                         tip_angle = digiball_data["Tip Angle"]
+                        ball_diameter = digiball_data["Ball Diameter"]
+                        ball_yellow = digiball_data["Ball Color"]=="Yellow"
+                        tip_diameter = digiball_data["Tip Diameter"]
+                        tip_curvature = digiball_data["Tip Curvature"]
 
                         center = (center_x, center_y)
-                        ball.draw(center, ball_radius_optimized, tip_angle, tip_percent, straightness)
+                        ball.draw(center, ball_radius_optimized, ball_diameter, ball_yellow, tip_diameter,
+                                  tip_curvature, tip_angle, tip_percent, straightness)
 
                         # Spin
                         center = (left + dial_offset_x, top + dial_offset_y)

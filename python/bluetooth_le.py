@@ -34,6 +34,10 @@ class BLE_async():
         data["Speed KMPH"] = 5
         data["Spin RPS"] = 3
         data["Tip Angle"] = 45
+        data["Ball Diameter"] = 2.25
+        data["Ball Color"] = "White"
+        data["Tip Diameter"] = 11.8 / 25.4
+        data["Tip Curvature"] = 0.358
         data["Straightness"] = 0.9
         data["Straightness Text"] = "0.9"
         data["Straightness Threshold"] = 0.2
@@ -66,8 +70,8 @@ class BLE_async():
 
         self._digiball_mac_addresses[0] = data["MAC Address"]
 
-        digiball_data = [None,None]
-        digicue_data = [data,None]
+        digiball_data = [data,None]
+        digicue_data = [None,None]
 
         return digiball_data, digicue_data
 
@@ -86,7 +90,7 @@ class BLE_async():
                 if manuf_id == 0x03DE: #NRLLC
 
                     mdata = manuf[manuf_id]
-                    device_type = int(mdata[3])
+                    device_type = int(mdata[3]&0xF)
 
                     if device_type==1: #DigiBall device type is always 1
 
@@ -126,6 +130,22 @@ class BLE_async():
                                 spin_degrees = 180 / pi * atan2(spin_horz_dps, spin_vert_dps)
                                 data["Spin RPS"] = spin_mag_rpm/60
                                 data["Tip Angle"] = spin_degrees
+
+                                ball_type = (mdata[3]>>4)&0xF
+
+                                ball_types = ((2.250, "White", 0.465, 0.358),  # Pool
+                                              (2.438, "White", 0.465, 0.358),  # Carom
+                                              (2.438, "Yellow", 0.465, 0.358),  # Carom yellow
+                                              (2.063, "White", 0.354, 0.250),  # Snooker
+                                              (2.000, "White", 0.315, 0.250),  # English pool
+                                              (2.688, "White", 0.492, 0.375))  # Russian pyramid
+
+                                properties = ball_types[ball_type]
+
+                                data["Ball Diameter"] = properties[0]
+                                data["Ball Color"] = properties[1]
+                                data["Tip Diameter"] = properties[2]
+                                data["Tip Curvature"] = properties[3]
 
                                 #Post data
                                 if self._digiball_player_data[player-1] is None:

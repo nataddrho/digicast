@@ -6,16 +6,13 @@ from math import *
 
 class Ball():
 
-    def __init__(self, screen, ball_type, yellow_ball=False):
+    def __init__(self, screen):
         self._radius = None
         self._center = None
         self._screen = screen
-        self._ball_type = ball_type # pool, carom, snooker
 
-        if (yellow_ball):
-            self._ball_image = pygame.image.load("assets/blank_yellow_hires.png")
-        else:
-            self._ball_image = pygame.image.load("assets/blank_hires.png")
+        self._ball_image_yellow = pygame.image.load("assets/blank_yellow_hires.png")
+        self._ball_image_white = pygame.image.load("assets/blank_hires.png")
         self._ball_image_scaled = None
 
     def _draw_circle_alpha(self, surface, color, rect, radius):
@@ -24,14 +21,17 @@ class Ball():
         pygame.draw.circle(shape_surf,color,(radius, radius), radius)
         surface.blit(shape_surf, rect)
 
-
-
-    def draw(self, center, radius, tip_angle=0, tip_percent=0, straightness=None):
+    def draw(self, center, radius, ball_diameter, ball_yellow, tip_diameter, tip_curvature,
+             tip_angle=0, tip_percent=0, straightness=None):
         if radius != self._radius or center!=self._center:
             self._radius = radius
             self._center = center
             pixels = 2*radius
-            self._ball_image_scaled = pygame.transform.smoothscale(self._ball_image, (pixels,pixels))
+            if (ball_yellow):
+                ball_image = self._ball_image_yellow
+            else:
+                ball_image = self._ball_image_white
+            self._ball_image_scaled = pygame.transform.smoothscale(ball_image, (pixels,pixels))
 
         # Draw ball image
         center_x, center_y = self._center
@@ -54,18 +54,8 @@ class Ball():
 
 
         # Calculate tip outline position
-        if self._ball_type == "carom":
-            ball_radius = 1.211
-            tip_radius = 11.5 / (25.4 * 2)
-            tip_curvature = 0.358
-        elif self._ball_type == "snooker":
-            ball_radius = 1.033
-            tip_radius = 10.0 / (25.4 * 2)
-            tip_curvature = 0.250
-        else: #pool
-            ball_radius = 1.125
-            tip_radius = 11.8 / (25.4 * 2)
-            tip_curvature = 0.358
+        ball_radius = ball_diameter / 2
+        tip_radius = tip_diameter / 2
 
         tip_radius_curvature_ratio = tip_curvature / ball_radius
 
