@@ -131,7 +131,7 @@ class BLE_async():
                                 data["Spin RPS"] = spin_mag_rpm/60
                                 data["Tip Angle"] = spin_degrees
 
-                                ball_type = (mdata[3]>>4)&0xF
+
 
                                 ball_types = ((2.250, "White", 0.465, 0.358),  # Pool
                                               (2.438, "White", 0.465, 0.358),  # Carom
@@ -139,6 +139,10 @@ class BLE_async():
                                               (2.063, "White", 0.354, 0.250),  # Snooker
                                               (2.000, "White", 0.315, 0.250),  # English pool
                                               (2.688, "White", 0.492, 0.375))  # Russian pyramid
+
+                                ball_type = (mdata[3] >> 4) & 0xF
+                                if ball_type>(len(ball_types)-1):
+                                    ball_type = 0
 
                                 properties = ball_types[ball_type]
 
