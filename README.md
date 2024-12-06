@@ -1,5 +1,5 @@
 
-# digiball-pi
+# DigiCast
 A light-weight Python-based application for Raspberry Pi Zero 2 W (or any other platform that has BLE hardware and can run Python). The program displays information from one or two DigiBalls in real time. This is a BLE straight to HDMI solution.
 
 The DigiBall is a digital billiards ball that measures the accuracy of your stroke so that you can compare it to your intentions. Novice players may not give any thought to the importance of where on the face of the cue ball they hit it, as long as the cue ball makes the object ball go in the pocket. But for any high level of play, it is extremely important. Hitting the ball too much on one side of center will cause it to deflect in the opposite direction of your aiming line, resulting in a miss. Advanced players know this, and use the deviation in combination with deliberate tip offset to both pocket the object ball and spin the cue ball off of the rails into desired positions. But again, deviations in the accuracy of the deliberate off-center tip hits cause poor results. By obtaining real time feedback on where you actually hit the ball and comparing it to where you intended to hit the ball, you can make permanent adjustments quickly.
@@ -38,22 +38,22 @@ See www.digicue.net for more information.
 
 10. Install the BLE library Bleak by running ```sudo apt install python3-bleak```
 
-11. Clone the digiball-pi repository with ```git clone https://github.com/nataddrho/digiball-pi.git```
+11. Clone the digiball-pi repository with ```git clone https://github.com/nataddrho/digicast.git```
 
-12. Create an automatic launch script. ```sudo nano /etc/rc/local``` Before ```exit 0``` at the bottom of the file, add
+12. DEPRECIATED: Create an automatic launch script. ```sudo nano /etc/rc.local``` Before ```exit 0``` at the bottom of the file, add
 
 ```
-cd /home/username/digiball-pi/python
-python main.py pool
+cd /home/username/digicast/python
+python main.py
 ```
 
-Replace "pool" with "snooker" or "carom" depending on the type of DigiBall you own.
+12. Create a systemd service. Copy service to systemd: ```sudo cp digicast.service /lib/systemd/system``` Register the service: ```sudo systemctl daemon-reload``` Tell system to start on boot: ```sudo systemctl enable blink.service``` 
 
 13. Put the file system into read-only mode by creating an overlay. This protects from corruption caused by turning off the power of the Raspberry Pi abruptly (which is what we want to do). Run ```sudo raspi-config```, navigate to Performance Options, Overlay File System and press enter. Select Yes when prompted to enable the overlay file system. Select Yes when prompted to write-protect the boot partition.
 
 14. Reboot the system.
 
-15. The DigiBall application should start automatically on every power up.
+15. The DigiCast application should start automatically on every power up.
 
 
 ### How to Use:
