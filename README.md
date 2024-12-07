@@ -30,7 +30,7 @@ See www.digicue.net for more information.
 
 6. Build image on micro-SD card
 
-7. Install the card into the Zero 2, plug a mouse and keyboard through a USB hub into the micro-USB port, and power on. Or connect remotely with SSH if you know the IP address already.
+7. Install the card into the Zero 2, plug a mouse and keyboard through a USB hub into the micro-USB port, and power on. Or connect remotely with SSH at digicast@digicast, or if you know the IP address already.
 
 8. Wait for the system to boot into the Desktop. Navigate to Raspberry Pi Configuration and change Boot to CLI. Save and restart. Alternatively, you can open a terminal and perform the same operation by using the ```raspi-config``` command. Reboot by typing ```sudo shutdown -r now```
 
@@ -40,14 +40,7 @@ See www.digicue.net for more information.
 
 11. Clone the digiball-pi repository with ```git clone https://github.com/nataddrho/digicast.git```
 
-12. DEPRECIATED: Create an automatic launch script. ```sudo nano /etc/rc.local``` Before ```exit 0``` at the bottom of the file, add
-
-```
-cd /home/username/digicast/python
-python main.py
-```
-
-12. Create a systemd service. Copy service to systemd: ```sudo cp digicast.service /lib/systemd/system``` Register the service: ```sudo systemctl daemon-reload``` Tell system to start on boot: ```sudo systemctl enable blink.service``` 
+12. Create a systemd service. Copy service to systemd: ```sudo cp digicast.service /lib/systemd/system``` Register the service: ```sudo systemctl daemon-reload``` Tell system to start on boot: ```sudo systemctl enable digicast.service``` 
 
 13. Put the file system into read-only mode by creating an overlay. This protects from corruption caused by turning off the power of the Raspberry Pi abruptly (which is what we want to do). Run ```sudo raspi-config```, navigate to Performance Options, Overlay File System and press enter. Select Yes when prompted to enable the overlay file system. Select Yes when prompted to write-protect the boot partition.
 

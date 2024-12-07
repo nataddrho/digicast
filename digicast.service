@@ -1,9 +1,13 @@
+#!/bin/bash
+
 [Unit]
 Description=DigiCast
 After=multi-user.target
 
 [Service]
-ExecStart=/home/digicast/run.sh
+WorkingDirectory=/home/digicast/digicast/python
+ExecStart=/usr/bin/python3 /home/digicast/digicast/python/main.py
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
