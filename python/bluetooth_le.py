@@ -212,25 +212,18 @@ class BLE_async():
                                 if (tmp > 125):
                                     tmp = 125
                                 score_jab = (125 - tmp) / 12.5
-                                score_follow = follow_thru - 1;
-                                alert_steer_right = sin(impact_angle * pi / 180) < 0;
+                                score_follow = follow_thru - 1
+                                if score_follow<0:
+                                    score_follow = 0
+                                alert_steer_right = sin(impact_angle * pi / 180) < 0
 
                                 steering_dir = alert1&1==1
-                                score_steering = 0
-                                if impact_mag * 255 <= 10:
-                                    score_steering = 10
-                                else:
-                                    for k in range(1,11):
-                                        tmp = k * 85 / 9.0
-                                        if impact_angle > (90-tmp) and impact_angle < (90+tmp):
-                                            break
-                                        if impact_angle > (270 - tmp) and impact_angle < (270 + tmp):
-                                            score_steering += 1;
 
                                 tmp = impact_mag * 255
                                 if tmp > 50:
                                     tmp = 50
                                 score_straightness = (50-tmp) / 5.0
+                                score_steering = score_straightness * abs(cos(impact_angle * pi / 180))
                                 score_interval = shot_timer / 255;
 
                                 straightness_t = [0.893, 0.785, 0.571, 0.25]
@@ -257,7 +250,7 @@ class BLE_async():
                                 data["Finish Enabled"] = (aconf0>>7)&1==1
                                 data["Tip Steer"] = score_steering/10
                                 data["Tip Steer Text"] = "%.1f"%score_steering
-                                data["Tip Steer Threshold"] = steering_t[aconf2&3]
+                                data["Tip Steer Threshold"] = data["Straightness Threshold"] #steering_t[aconf2&3]
                                 data["Tip Steer Enabled"] = (aconf0>>4)&1==1
                                 data["Follow Through"] = score_follow/10
                                 data["Follow Through Text"] = "%.1f"%score_follow
