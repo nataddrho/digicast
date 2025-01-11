@@ -68,8 +68,6 @@ def gui_main():
         pygame.display.flip()
 
 
-
-
 if __name__ == '__main__':
     print("digiball-pi: Version %s (%s)"%(version.version, version.date))
     gui_main()

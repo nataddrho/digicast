@@ -75,10 +75,6 @@ class BLE_async():
 
         return digiball_data, digicue_data
 
-
-    async def _scan(self):
-        self._devices = await BleakScanner.discover(2.0, return_adv=True)
-
     def _digiball_parser(self, devices):
 
         for mac_address in devices:
@@ -274,6 +270,8 @@ class BLE_async():
                                     self._new_device = True
                                 self._digicue_player_data[player-1] = data
 
+    async def _scan(self):
+        self._devices = await BleakScanner.discover(2.0, return_adv=True)
 
     def async_task(self,q):
         try:
