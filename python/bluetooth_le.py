@@ -271,14 +271,21 @@ class BLE_async():
                                 self._digicue_player_data[player-1] = data
 
     async def _scan(self):
-        self._devices = await BleakScanner.discover(2.0, return_adv=True)
+        stop_event = asyncio.Event()
 
-    def async_task(self,q):
-        try:
-            asyncio.run(self._scan())
-            self._digiball_parser(self._devices)
-            self._digicue_parser(self._devices)
-            q.put((self._digiball_player_data, self._digicue_player_data))
-        except:
-            pass
+        def callback(device, advertising_data):
+            print(device, advertising_data)
+            # self._digiball_parser(self._devices)
+            # self._digicue_parser(self._devices)
+            # q.put((self._digiball_player_data, self._digicue_player_data))
+
+        async with BleakScanner(callback) as scanner:
+            # Important! Wait for an event to trigger stop, otherwise scanner
+            # will stop immediately.
+            await stop_event.wait()
+
+
+    def async_task(self, q):
+        asyncio.run(self._scan())
+
 

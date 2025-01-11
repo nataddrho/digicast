@@ -61,12 +61,11 @@ def gui_main():
                 force_screen_clear = ble.check_for_new_device()
                 scaffold.update_data(digiball_data, digicue_data, force_screen_clear)
 
-            thread = threading.Thread(target=ble.async_task, args=(q,))
-            thread.start()
 
         scaffold.draw()
         pygame.display.flip()
 
+    thread.join()
 
 if __name__ == '__main__':
     print("digiball-pi: Version %s (%s)"%(version.version, version.date))
