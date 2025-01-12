@@ -272,8 +272,7 @@ class BLE_async():
 
         return False
 
-    async def _scan(self, q):
-        stop_event = asyncio.Event()
+    async def _scan(self, q, stop_thread):
 
         def callback(device, advertising_data):
             #Calls on every advertisement received
@@ -286,10 +285,13 @@ class BLE_async():
         async with BleakScanner(callback) as scanner:
             # Important! Wait for an event to trigger stop, otherwise scanner
             # will stop immediately.
-            await stop_event.wait()
+            await stop_thread.wait()
 
 
-    def async_task(self, q):
-        asyncio.run(self._scan(q))
+    def async_task(self, q, stop_thread):
+        asyncio.run(self._scan(q, stop_thread))
+
+
+
 
 

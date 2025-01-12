@@ -7,6 +7,7 @@ import queue
 import sys
 import bluetooth_le
 import version
+import asyncio
 
 
 def gui_main():
@@ -14,7 +15,8 @@ def gui_main():
     ble = bluetooth_le.BLE_async()
     q = queue.Queue()
 
-    thread = threading.Thread(target=ble.async_task, args=(q,))
+    stop_thread = asyncio.Event()
+    thread = threading.Thread(target=ble.async_task, args=(q,stop_thread,))
     thread.start()
 
     # initialize pygame
@@ -69,6 +71,7 @@ def gui_main():
         pygame.display.flip()
         clock.tick(2)
 
+    stop_thread.set()
     thread.join()
 
 if __name__ == '__main__':
