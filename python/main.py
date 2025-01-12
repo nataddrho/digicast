@@ -28,6 +28,9 @@ def gui_main():
     # Variable to keep our game loop running
     gameOn = True
 
+    # Limit frame rate
+    clock = pygame.time.Clock()
+
     # Our game loo
     i = 0
     while gameOn:
@@ -64,6 +67,7 @@ def gui_main():
 
         scaffold.draw()
         pygame.display.flip()
+        clock.tick(2)
 
     thread.join()
 

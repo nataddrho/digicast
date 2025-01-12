@@ -83,8 +83,6 @@ class BLE_async():
 
             if manuf_id == 0x03DE: #NRLLC
 
-                print("DigiBall detected")
-
                 mdata = manuf[manuf_id]
                 device_type = int(mdata[3]&0xF)
 
@@ -151,133 +149,139 @@ class BLE_async():
                             if self._digiball_player_data[player-1] is None:
                                 self._new_device = True
                             self._digiball_player_data[player-1] = data
+                            return True
 
+        return False
 
-    def _digicue_parser(self, devices):
+    def _digicue_parser(self, device, advertising_data):
+        mac_address = device.address
+        d = advertising_data
+        rssi = d.rssi
+        manuf = d.manufacturer_data
+        for manuf_id in manuf:
 
-        for mac_address in devices:
-            d = devices[mac_address][1]
-            rssi = d.rssi
-            manuf = d.manufacturer_data
-            for manuf_id in manuf:
+            if manuf_id == 0xDE03: #NRLLC reversed
 
-                if manuf_id == 0xDE03: #NRLLC reversed
+                mdata = manuf[manuf_id]
 
-                    mdata = manuf[manuf_id]
+                if len(mdata)==17: #DigiCue data is 17 bytes in length
 
-                    if len(mdata)==17: #DigiCue data is 17 bytes in length
+                    # Save device as target if brought close to receiver
+                    rssi_range = -65
+                    if self._digicue_mac_addresses[0] is None and rssi>rssi_range:
+                        self._digicue_mac_addresses[0] = mac_address
+                    elif self._digicue_mac_addresses[1] is None and rssi>rssi_range and mac_address!=self._digicue_mac_addresses[0]:
+                        self._digicue_mac_addresses[1] = mac_address
 
-                        # Save device as target if brought close to receiver
-                        rssi_range = -65
-                        if self._digicue_mac_addresses[0] is None and rssi>rssi_range:
-                            self._digicue_mac_addresses[0] = mac_address
-                        elif self._digicue_mac_addresses[1] is None and rssi>rssi_range and mac_address!=self._digicue_mac_addresses[0]:
-                            self._digicue_mac_addresses[1] = mac_address
+                    if mac_address in self._digicue_mac_addresses:
 
-                        if mac_address in self._digicue_mac_addresses:
+                        if mac_address == self._digicue_mac_addresses[0]:
+                            player = 1
+                        else:
+                            player = 2
 
-                            if mac_address == self._digicue_mac_addresses[0]:
-                                player = 1
-                            else:
-                                player = 2
+                        config = mdata[1]
+                        aconf0 = mdata[2]
+                        aconf1 = mdata[3]
+                        aconf2 = mdata[4]
+                        aconf3 = mdata[5]
+                        data_type = (config>>3)&3
 
-                            config = mdata[1]
-                            aconf0 = mdata[2]
-                            aconf1 = mdata[3]
-                            aconf2 = mdata[4]
-                            aconf3 = mdata[5]
-                            data_type = (config>>3)&3
+                        if data_type<=1:
 
-                            if data_type<=1:
+                            alert0 = mdata[6]
+                            alert1 = mdata[7]
+                            shot_timer = mdata[8]
+                            pause_time = mdata[9]
+                            follow_thru = mdata[10]
+                            jab_mag = mdata[11]
+                            impact_angle = mdata[12] * 180 / 128.0
+                            impact_mag = mdata[13] / 255.0
+                            freeze_ang = mdata[14] * 180 / 128.0
+                            freeze_time = mdata[15]
+                            freeze_mag = alert1 >> 1
 
-                                alert0 = mdata[6]
-                                alert1 = mdata[7]
-                                shot_timer = mdata[8]
-                                pause_time = mdata[9]
-                                follow_thru = mdata[10]
-                                jab_mag = mdata[11]
-                                impact_angle = mdata[12] * 180 / 128.0
-                                impact_mag = mdata[13] / 255.0
-                                freeze_ang = mdata[14] * 180 / 128.0
-                                freeze_time = mdata[15]
-                                freeze_mag = alert1 >> 1
+                            score_finish = (freeze_time + 48) * 0.012
+                            score_backstroke = pause_time * 0.012
+                            tmp = jab_mag;
+                            if (tmp > 125):
+                                tmp = 125
+                            score_jab = (125 - tmp) / 12.5
+                            score_follow = follow_thru - 1
+                            if score_follow<0:
+                                score_follow = 0
+                            alert_steer_right = sin(impact_angle * pi / 180) < 0
 
-                                score_finish = (freeze_time + 48) * 0.012
-                                score_backstroke = pause_time * 0.012
-                                tmp = jab_mag;
-                                if (tmp > 125):
-                                    tmp = 125
-                                score_jab = (125 - tmp) / 12.5
-                                score_follow = follow_thru - 1
-                                if score_follow<0:
-                                    score_follow = 0
-                                alert_steer_right = sin(impact_angle * pi / 180) < 0
+                            steering_dir = alert1&1==1
 
-                                steering_dir = alert1&1==1
+                            tmp = impact_mag * 255
+                            if tmp > 50:
+                                tmp = 50
+                            score_straightness = (50-tmp) / 5.0
+                            score_steering = score_straightness * abs(cos(impact_angle * pi / 180))
+                            score_interval = shot_timer / 255;
 
-                                tmp = impact_mag * 255
-                                if tmp > 50:
-                                    tmp = 50
-                                score_straightness = (50-tmp) / 5.0
-                                score_steering = score_straightness * abs(cos(impact_angle * pi / 180))
-                                score_interval = shot_timer / 255;
+                            straightness_t = [0.893, 0.785, 0.571, 0.25]
+                            steering_t = straightness_t
+                            follow_t = [.4, .7, .9, 1]
+                            jab_t = [.8, .6, .4, .2]
+                            backstroke_t = [.1, .2, .5, 1]
+                            interval_t = [0.0382, 0.0612, 0.0919, 0.114]
+                            finish_t = [1/3, 1.5/3, 2/3, 2.5/3]
 
-                                straightness_t = [0.893, 0.785, 0.571, 0.25]
-                                steering_t = straightness_t
-                                follow_t = [.4, .7, .9, 1]
-                                jab_t = [.8, .6, .4, .2]
-                                backstroke_t = [.1, .2, .5, 1]
-                                interval_t = [0.0382, 0.0612, 0.0919, 0.114]
-                                finish_t = [1/3, 1.5/3, 2/3, 2.5/3]
+                            data = {}
+                            data["RSSI"] = rssi
+                            data["MAC Address"] = mac_address
 
-                                data = {}
-                                data["RSSI"] = rssi
-                                data["MAC Address"] = mac_address
+                            #Parse digicue data here
+                            data["Straightness"] = score_straightness/10
+                            data["Straightness Text"] = "%.1f"%score_straightness
+                            data["Straightness Threshold"] = straightness_t[(aconf2>>2)&3]
+                            data["Straightness Enabled"] = (aconf0>>5)&1==1
+                            data["Straightness Angle"] = impact_angle
+                            data["Finish"] = score_finish/3
+                            data["Finish Text"] = "%.1fs"%(score_finish)
+                            data["Finish Threshold"] = finish_t[(aconf2>>6)&3]
+                            data["Finish Enabled"] = (aconf0>>7)&1==1
+                            data["Tip Steer"] = score_steering/10
+                            data["Tip Steer Text"] = "%.1f"%score_steering
+                            data["Tip Steer Threshold"] = data["Straightness Threshold"] #steering_t[aconf2&3]
+                            data["Tip Steer Enabled"] = (aconf0>>4)&1==1
+                            data["Follow Through"] = score_follow/10
+                            data["Follow Through Text"] = "%.1f"%score_follow
+                            data["Follow Through Threshold"] = follow_t[(aconf1>>6)&3]
+                            data["Follow Through Enabled"] = (aconf0>>3)&1==1
+                            data["Jab"] = score_jab/10
+                            data["Jab Text"] = "%.1f"%score_jab
+                            data["Jab Threshold"] = jab_t[(aconf1>>4)&3]
+                            data["Jab Enabled"] = (aconf0>>2)&1==1
+                            data["Backstroke Pause"] = score_backstroke
+                            data["Backstroke Pause Text"] = "%.1fs"%score_backstroke
+                            data["Backstroke Pause Threshold"] = backstroke_t[(aconf1>>2)&3]
+                            data["Backstroke Pause Enabled"] = (aconf0>>1)&1==1
+                            data["Shot Interval"] = score_interval
+                            data["Shot Interval Text"] = "%is"%(shot_timer * 0.512)
+                            data["Shot Interval Threshold"] = interval_t[aconf1&3]
+                            data["Shot Interval Enabled"] = aconf0&1==1
 
-                                #Parse digicue data here
-                                data["Straightness"] = score_straightness/10
-                                data["Straightness Text"] = "%.1f"%score_straightness
-                                data["Straightness Threshold"] = straightness_t[(aconf2>>2)&3]
-                                data["Straightness Enabled"] = (aconf0>>5)&1==1
-                                data["Straightness Angle"] = impact_angle
-                                data["Finish"] = score_finish/3
-                                data["Finish Text"] = "%.1fs"%(score_finish)
-                                data["Finish Threshold"] = finish_t[(aconf2>>6)&3]
-                                data["Finish Enabled"] = (aconf0>>7)&1==1
-                                data["Tip Steer"] = score_steering/10
-                                data["Tip Steer Text"] = "%.1f"%score_steering
-                                data["Tip Steer Threshold"] = data["Straightness Threshold"] #steering_t[aconf2&3]
-                                data["Tip Steer Enabled"] = (aconf0>>4)&1==1
-                                data["Follow Through"] = score_follow/10
-                                data["Follow Through Text"] = "%.1f"%score_follow
-                                data["Follow Through Threshold"] = follow_t[(aconf1>>6)&3]
-                                data["Follow Through Enabled"] = (aconf0>>3)&1==1
-                                data["Jab"] = score_jab/10
-                                data["Jab Text"] = "%.1f"%score_jab
-                                data["Jab Threshold"] = jab_t[(aconf1>>4)&3]
-                                data["Jab Enabled"] = (aconf0>>2)&1==1
-                                data["Backstroke Pause"] = score_backstroke
-                                data["Backstroke Pause Text"] = "%.1fs"%score_backstroke
-                                data["Backstroke Pause Threshold"] = backstroke_t[(aconf1>>2)&3]
-                                data["Backstroke Pause Enabled"] = (aconf0>>1)&1==1
-                                data["Shot Interval"] = score_interval
-                                data["Shot Interval Text"] = "%is"%(shot_timer * 0.512)
-                                data["Shot Interval Threshold"] = interval_t[aconf1&3]
-                                data["Shot Interval Enabled"] = aconf0&1==1
+                            #Post data
+                            if self._digicue_player_data[player-1] is None:
+                                self._new_device = True
+                            self._digicue_player_data[player-1] = data
+                            return True
 
-                                #Post data
-                                if self._digicue_player_data[player-1] is None:
-                                    self._new_device = True
-                                self._digicue_player_data[player-1] = data
+        return False
 
-    async def _scan(self):
+    async def _scan(self, q):
         stop_event = asyncio.Event()
 
         def callback(device, advertising_data):
-            #Figure out how to get data to these functions
-            self._digiball_parser(device, advertising_data)
-            #self._digicue_parser(advertising_data)
-            #q.put((self._digiball_player_data, self._digicue_player_data))
+            #Calls on every advertisement received
+            db = self._digiball_parser(device, advertising_data)
+            dc = self._digicue_parser(device, advertising_data)
+            if (db or dc):
+                #Post everytime a packet is successfully parsed
+                q.put((self._digiball_player_data, self._digicue_player_data))
 
         async with BleakScanner(callback) as scanner:
             # Important! Wait for an event to trigger stop, otherwise scanner
@@ -286,6 +290,6 @@ class BLE_async():
 
 
     def async_task(self, q):
-        asyncio.run(self._scan())
+        asyncio.run(self._scan(q))
 
 
