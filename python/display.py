@@ -274,6 +274,8 @@ class Scaffold():
                         # Time
                         if ("Timestamp" in digiball_data):
                             time_sec = time.time()-digiball_data["Timestamp"]
+                            if time_sec>300:
+                                time_sec=300
                         else:
                             time_sec = digiball_data["Motionless"]
 
