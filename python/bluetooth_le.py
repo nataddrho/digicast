@@ -2,12 +2,13 @@ from bleak import BleakScanner
 import asyncio
 import struct
 from math import *
+import time
 class BLE_async():
 
     def __init__(self):
         self.test = False #Turn on to test graphical display
         self._done = True
-        self._last_shot_number = -1
+        self._digiball_last_shot_number = -1
         self._digiball_mac_addresses = [None, None]
         self._digicue_mac_addresses = [None, None]
         self._digiball_player_data = [None, None]
@@ -106,14 +107,21 @@ class BLE_async():
                         shot_number = int(mdata[6]) & 0x3F
 
                         if data_ready:
+
                             data = {}
                             data["RSSI"] = rssi
                             data["MAC Address"] = mac_address
 
+                            # Check for new shot
+                            data["Motionless"] = (int(mdata[7]) & 0x03) + int(mdata[8])
+                            if shot_number != self._digiball_last_shot_number:
+                                self._digiball_last_shot_number = shot_number
+                                data["Timestamp"] = time.time() - data["Motionless"]
+
                             #Parse digiball data here
                             data["Charging"] = int(mdata[7])>>6
                             data["Gyro Clipping"] = (int(mdata[6])>>7)==1
-                            data["Motionless"] = (int(mdata[7]) & 0x03) + int(mdata[8])
+
                             data["Shot Number"] = shot_number
                             data["Tip Percent"] = int(mdata[11])
                             speed_factor = int(mdata[12])
@@ -282,10 +290,9 @@ class BLE_async():
                 #Post everytime a packet is successfully parsed
                 q.put((self._digiball_player_data, self._digicue_player_data))
 
-        async with BleakScanner(callback) as scanner:
-            # Important! Wait for an event to trigger stop, otherwise scanner
-            # will stop immediately.
-            await stop_thread.wait()
+        while(not stop_thread.is_set()):
+            async with BleakScanner(callback) as scanner:
+                await asyncio.sleep(3)
 
 
     def async_task(self, q, stop_thread):

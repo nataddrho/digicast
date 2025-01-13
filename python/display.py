@@ -7,6 +7,7 @@ import display_graph
 import display_plot
 import display_image
 import version
+import time
 
 def optimize_circle_placement(center_x, center_y, ball_radius):
     Z = sqrt(center_x ** 2 + center_y ** 2)
@@ -271,7 +272,11 @@ class Scaffold():
                         speed.draw(center, dial_radius)
 
                         # Time
-                        time_sec = digiball_data["Motionless"]
+                        if ("Timestamp" in digiball_data):
+                            time_sec = digiball_data["Timestamp"]-time.time()
+                        else:
+                            time_sec = digiball_data["Motionless"]
+
                         charging = digiball_data["Charging"]
                         if charging == 1:
                             time.update_data(0, "CHARGE", "BATTERY")
