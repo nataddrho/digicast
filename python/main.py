@@ -68,8 +68,7 @@ def gui_main():
 
 
         scaffold.draw()
-        pygame.display.flip()
-        clock.tick(1)
+        pygame.display.flip()        
 
     stop_thread.set()
     thread.join()
