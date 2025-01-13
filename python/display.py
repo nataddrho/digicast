@@ -148,7 +148,7 @@ class Scaffold():
             center_y = top + height / 2
             ball_radius_optimized = min(width_digiball, height) / 2 - self._ball_pad
 
-            ball, spin, tip, speed, time, graph, plot = self._frame_objects[frame]
+            ball, spin, tip, speed, timedial, graph, plot = self._frame_objects[frame]
 
             if frame == 0:
                 ret = optimize_circle_placement(center_x, center_y, ball_radius_optimized)
@@ -273,21 +273,21 @@ class Scaffold():
 
                         # Time
                         if ("Timestamp" in digiball_data):
-                            time_sec = digiball_data["Timestamp"]-time.time()
+                            time_sec = time.time()-digiball_data["Timestamp"]
                         else:
                             time_sec = digiball_data["Motionless"]
 
                         charging = digiball_data["Charging"]
                         if charging == 1:
-                            time.update_data(0, "CHARGE", "BATTERY")
+                            timedial.update_data(0, "CHARGE", "BATTERY")
                         elif charging == 2:
-                            time.update_data(0, "CHARGE", "ERROR")
+                            timedial.update_data(0, "CHARGE", "ERROR")
                         elif charging == 3:
-                            time.update_data(1, "CHARGE", "COMPLETE")
+                            timedial.update_data(1, "CHARGE", "COMPLETE")
                         else:
-                            time.update_data(time_sec / 300, "%i" % time_sec, "SEC")
+                            timedial.update_data(time_sec / 300, "%i" % time_sec, "SEC")
                         center = (left + width_digiball - dial_offset_x, top + height - dial_offset_y)
-                        time.draw(center, dial_radius)
+                        timedial.draw(center, dial_radius)
 
 
                 # RSSI

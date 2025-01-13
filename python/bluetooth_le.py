@@ -9,6 +9,7 @@ class BLE_async():
         self.test = False #Turn on to test graphical display
         self._done = True
         self._digiball_last_shot_number = -1
+        self._digiball_timestamp = None
         self._digiball_mac_addresses = [None, None]
         self._digicue_mac_addresses = [None, None]
         self._digiball_player_data = [None, None]
@@ -108,15 +109,19 @@ class BLE_async():
 
                         if data_ready:
 
+                            # Check for new shot
+                            seconds_motionless = (int(mdata[7]) & 0x03) + int(mdata[8])
+                            if shot_number != self._digiball_last_shot_number:
+                                self._digiball_last_shot_number = shot_number
+                                self._digiball_timestamp = time.time() - seconds_motionless
+
                             data = {}
                             data["RSSI"] = rssi
                             data["MAC Address"] = mac_address
 
-                            # Check for new shot
-                            data["Motionless"] = (int(mdata[7]) & 0x03) + int(mdata[8])
-                            if shot_number != self._digiball_last_shot_number:
-                                self._digiball_last_shot_number = shot_number
-                                data["Timestamp"] = time.time() - data["Motionless"]
+                            if (self._digiball_timestamp!=None):
+                                data["Timestamp"] = self._digiball_timestamp
+                            data["Motionless"] = seconds_motionless
 
                             #Parse digiball data here
                             data["Charging"] = int(mdata[7])>>6
