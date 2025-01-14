@@ -113,6 +113,9 @@ class BLE_async():
                             seconds_motionless = (int(mdata[7]) & 0x03) + int(mdata[8])
                             if shot_number != self._digiball_last_shot_number:
                                 self._digiball_last_shot_number = shot_number
+                                self._digiball_timestamp = None
+
+                            if self._digiball_timestamp==None and seconds_motionless>0:
                                 self._digiball_timestamp = time.time() - seconds_motionless
 
                             data = {}
