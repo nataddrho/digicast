@@ -50,6 +50,35 @@ See www.digicue.net for more information.
 
 15. The DigiCast application should start automatically on every power up.
 
+### Generating a Backup Image:
+
+1. Format an SD Card or USB Flash drive (8GB or larger) to NTFS or exFAT. Don't use FAT32 because the individual backup image file size is too small for this format.
+
+2. Use micro-USB adapter and attach a USB-3.0 hub (plugs must be blue) to the Raspberry Pi USB port (to the left of the power port). The USB port and power ports both use micro-USB connectors. You will have to remove the Raspberry Pi from the DigiCast case in order to access this port.
+
+3. Plug in both a keyboard and a micro SD card reader (or USB Flash drive) to the hub.  
+
+3. Power on unit. Wait for DigiCast splash screen to appear with DigiBall/DigiCue/Aramith logos.
+
+4. Press the Backspace key once and wait for the prompt to appear.
+
+5. Log in with username and password.
+
+6. Type ```lsblk``` to show the available devices for mounting. The SD Card / Flash drive will usually appear as /dev/sda1
+
+7. Make a mounting directory by typing ```sudo mkdir /mnt/backup```
+
+8. Mount your media by typing ```sudo mount /dev/sdaX /mnt/backup``` where X is the number of your device.
+
+9. Navigate to the backup utilities ```cd digicast/image-utils```
+
+10. Set scripts to executable ```sudo chmod +x image*```
+
+11. Start backup process. This will take an hour or two to complete with no immediate feedback messages: ```sudo ./image-backup --initial /mnt/backup/image.img```
+
+12. When complete, check image ```sudo ./image-check /mnt/backup/image.img```
+
+13. Unmount device by typing ```sudo umount /dev/sdaX``` where X is the number of your device.
 
 ### How to Use:
 
