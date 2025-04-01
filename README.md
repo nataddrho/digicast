@@ -46,9 +46,15 @@ See www.digicue.net for more information.
 
 13. Put the file system into read-only mode by creating an overlay. This protects from corruption caused by turning off the power of the Raspberry Pi abruptly (which is what we want to do). Run ```sudo raspi-config```, navigate to Performance Options, Overlay File System and press enter. Select Yes when prompted to enable the overlay file system. Select Yes when prompted to write-protect the boot partition.
 
-14. Reboot the system.
+14. Reboot the system by typing ```reboot```
 
 15. The DigiCast application should start automatically on every power up.
+
+16. Press the Backspace key once and wait for the prompt to appear. Log in.
+
+17. Verify that the overlay file system is enabled with the command ```cat /boot/firmware/cmdline.txt``` and verify that the argument ```overlayroot=tmpfs``` is present.
+
+18. Shutdown the system by typing ```sudo shutdown now```. When powered off you can then remove the SD Card and store or copy the image as you wish.
 
 ### Generating a Backup Image:
 
@@ -79,6 +85,22 @@ See www.digicue.net for more information.
 12. When complete, check image ```sudo ./image-check /mnt/backup/image.img```
 
 13. Unmount device by typing ```sudo umount /dev/sdaX``` where X is the number of your device.
+
+### Writing an Image File to SD Card with Windows
+
+1. If attempting to overwrite an SD Card that was previously used for a Raspberry Pi OS, you will first need to restore the structure of the card into Windows-digestible format. The easiest way to do this is to download the tool SDCardFormatter. A copy of this tool is included in this distribution as windows/SDCardFormatterv5_WinEN.zip. Install the program, make sure to select the first drive letter (bootfs) of the SD Card, and click Quick Format.
+
+2. Optional: Using Windows explorer reformat into exFAT if you desire if you plan on storing files larger than 4GB.
+
+3. Install Win32DiskImager. A copy can be found at windows/win32diskimager-1.0.0-install.exe.
+
+4. Open Win32DiskImager. Under Device, make sure to select the correct SD Card drive letter of the media you want to format. Select your image.img file you made previously.
+
+5. Click Write. The process should take about 9 minutes using USB 3.0.
+
+6. When finished you should see a bunch of messages from Windows complaining about the new SD card formats. Close these and then eject the first drive letter of the SD Card (bootfs).
+
+7. Install the SD card into your Raspberry Pi Zero 2 W and verify that it boots, and that the DigiCast program loads automatically.
 
 ### How to Use:
 
