@@ -3,6 +3,19 @@ import asyncio
 import struct
 from math import *
 import time
+
+def degrees2clock(angle_deg):
+    #Convert degrees into hours and minutes (o'clocks)
+    a = angle_deg
+    if a<0:
+        a+=360
+    hour = floor(a * 12/360.0)
+    minutes = a*12/360.0 - hour
+    if hour==0:
+        hour = 12.0
+    minutes = minutes*60
+    return "%i:%s"%(hour,("%i"%minutes).zfill(2))
+
 class BLE_async():
 
     def __init__(self):
@@ -35,6 +48,7 @@ class BLE_async():
         data["Speed KMPH"] = 5
         data["Spin RPS"] = 3
         data["Tip Angle"] = 45
+        data["Tip Clock"] = degrees2clock(45)
         data["Ball Diameter"] = 2.25
         data["Ball Color"] = "White"
         data["Tip Diameter"] = 11.8 / 25.4
@@ -140,7 +154,7 @@ class BLE_async():
                             spin_degrees = 180 / pi * atan2(spin_horz_dps, spin_vert_dps)
                             data["Spin RPS"] = spin_mag_rpm/60
                             data["Tip Angle"] = spin_degrees
-
+                            data["Tip Clock"] = degrees2clock(spin_degrees)
 
 
                             ball_types = ((2.250, "White", 0.465, 0.358),  # Pool

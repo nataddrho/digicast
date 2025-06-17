@@ -148,7 +148,8 @@ class Scaffold():
             center_y = top + height / 2
             ball_radius_optimized = min(width_digiball, height) / 2 - self._ball_pad
 
-            ball, spin, tip, speed, timedial, graph, plot = self._frame_objects[frame]
+            ball, spin, tip, clock, timedial, graph, plot = self._frame_objects[frame]
+            clock.dial_off()
 
             if frame == 0:
                 ret = optimize_circle_placement(center_x, center_y, ball_radius_optimized)
@@ -261,7 +262,8 @@ class Scaffold():
                         tip.update_data(tip_percent / 55, "%i" % tip_percent, "PFC")
                         tip.draw(center, dial_radius)
 
-                        # Speed
+                        """
+                        # Speed                        
                         center = (left + dial_offset_x, top + height - dial_offset_y)
                         speed_kmph = digiball_data["Speed KMPH"]
                         speed_kmph = round(speed_kmph * 2) / 2  # precision 0f 0.5 mph
@@ -270,6 +272,12 @@ class Scaffold():
                             speed_text = "%s+" % speed_text
                         speed.update_data(speed_kmph / 12, speed_text, "KM/H")
                         speed.draw(center, dial_radius)
+                        """
+
+                        # Clock Angle
+                        center = (left + dial_offset_x, top + height - dial_offset_y)
+                        clock.update_data(0, digiball_data["Tip Clock"], "o'clock")
+                        clock.draw(center, dial_radius)
 
                         # Time
                         if ("Timestamp" in digiball_data):

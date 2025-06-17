@@ -4,7 +4,6 @@ from pygame.locals import *
 import numpy as np
 import color_map
 
-
 class Dial():
 
     def __init__(self, screen):
@@ -21,6 +20,7 @@ class Dial():
         self._small_text = ''
         self._value_norm = 0
         self._data_changed = True
+        self._no_dial = False
 
     def _update_font_size(self):
         for i in range(1, 200, 1):
@@ -94,6 +94,9 @@ class Dial():
         self._small_text = small_text
         self._data_changed = True
 
+    def dial_off(self):
+        self._no_dial = True
+
     def draw(self, center, radius):
         if radius != self._radius or center!=self._center:
             self._radius = radius
@@ -112,10 +115,13 @@ class Dial():
             self._update_small_text()
 
         center_x, center_y = self._center
-        self._draw_dial_arc(self._value_norm)
+        if not self._no_dial:
+            self._draw_dial_arc(self._value_norm)
         white = (255, 255, 255)
         pygame.draw.circle(self._screen, white, center, radius + 1, 1)
         text_pos = (center_x - self._large_text_surface.get_width() / 2, center_y - self._large_text_surface.get_height() / 2)
         self._screen.blit(self._large_text_surface, text_pos)
         text_pos = (center_x - self._small_text_surface.get_width() / 2, center_y - self._small_text_surface.get_height() / 2 + self._large_text_surface.get_height() / 2 + 10)
         self._screen.blit(self._small_text_surface, text_pos)
+
+
