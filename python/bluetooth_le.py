@@ -1,8 +1,10 @@
 from bleak import BleakScanner
+from generate_image import DigiBallImage
 import asyncio
 import struct
 from math import *
 import time
+
 
 def degrees2clock(angle_deg):
     #Convert degrees into hours and minutes (o'clocks)
@@ -28,6 +30,15 @@ class BLE_async():
         self._digiball_player_data = [None, None]
         self._digicue_player_data = [None, None]
         self._new_device = False
+        self._webserver_objects = {}
+        self._webserver_output_path = "/dev/shm/digicast"
+        
+        self._ball_types =((2.250, "White", 0.465, 0.358),  # Pool
+                           (2.438, "White", 0.465, 0.358),  # Carom
+                           (2.438, "Yellow", 0.465, 0.358),  # Carom yellow
+                           (2.063, "White", 0.354, 0.250),  # Snooker
+                           (2.000, "White", 0.315, 0.250),  # English pool
+                           (2.688, "White", 0.492, 0.375))  # Russian pyramid
 
     def check_for_new_device(self): # Returns true if a new device was found. Clear screen if true
         new = self._new_device
@@ -103,6 +114,20 @@ class BLE_async():
                 device_type = int(mdata[3]&0xF)
 
                 if device_type==1: #DigiBall device type is always 1
+                    
+                    # If it is a digiball, generate image on webserver
+                    if mac_address in self._webserver_objects:
+                        gen_obj = self._webserver_objects[mac_address]
+                    else:
+                        image_file_name = "%s/digiball-%s.png"%(self._webserver_output_path,mac_address)
+                        ball_type = (mdata[3] >> 4) & 0xF
+                        if ball_type>(len(self._ball_types)-1):
+                            ball_type = 0
+                        properties = self._ball_types[ball_type]                        
+                        gen_obj = DigiBallImage(self._webserver_output_path, properties)
+                        self._webserver_objects[mac_address] = gen_obj
+                        
+                    gen_obj.update(mdata)
 
                     # Save device as target if brought close to receiver
                     rssi_range = -55
@@ -112,7 +137,7 @@ class BLE_async():
                         self._digiball_mac_addresses[1] = mac_address
 
                     if mac_address in self._digiball_mac_addresses:
-
+                        #Update app
                         if mac_address == self._digiball_mac_addresses[0]:
                             player = 1
                         else:
@@ -157,18 +182,13 @@ class BLE_async():
                             data["Tip Clock"] = degrees2clock(spin_degrees)
 
 
-                            ball_types = ((2.250, "White", 0.465, 0.358),  # Pool
-                                          (2.438, "White", 0.465, 0.358),  # Carom
-                                          (2.438, "Yellow", 0.465, 0.358),  # Carom yellow
-                                          (2.063, "White", 0.354, 0.250),  # Snooker
-                                          (2.000, "White", 0.315, 0.250),  # English pool
-                                          (2.688, "White", 0.492, 0.375))  # Russian pyramid
+                            
 
                             ball_type = (mdata[3] >> 4) & 0xF
-                            if ball_type>(len(ball_types)-1):
+                            if ball_type>(len(self._ball_types)-1):
                                 ball_type = 0
-
-                            properties = ball_types[ball_type]
+                                
+                            properties = self._ball_types[ball_type]
 
                             data["Ball Diameter"] = properties[0]
                             data["Ball Color"] = properties[1]

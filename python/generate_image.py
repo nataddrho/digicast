@@ -1,12 +1,20 @@
 from PIL import Image, ImageDraw
 from math import *
+import time
+import struct
+
+#Class for writing digiball images to the server
 
 class DigiBallImage():
 
-    def __init__(self, output_path, ball_diameter, is_yellow = False):
-
-        self._output_path = output_path
-        self._ball_diameter = ball_diameter
+    def __init__(self, output_path, properties):         
+                        
+        self._ball_diameter = properties[0]
+        is_yellow = properties[1] == "Yellow"
+        self._tip_diameter = properties[2]
+        self._tip_curvature = properties[3]
+        
+        self._output_path = output_path             
 
         if is_yellow:
             self._ball_image = Image.open("assets/blank_yellow.png").convert("RGBA")
@@ -15,13 +23,12 @@ class DigiBallImage():
 
         width, height = self._ball_image.size
         self._radius = min(width,height)/2
-        self._tip_diameter = 11.8 / 25.4
-        self._tip_curvature = 0.358
+        
+        self._timestamp = time.time()
 
-    def draw(self,tip_angle=0,tip_percent=0):
+    def _draw(self,tip_angle=0,tip_percent=0):
 
         try:
-
             # Create ball image and draw
             img = self._ball_image.copy()
             draw = ImageDraw.Draw(img, "RGBA")
@@ -38,8 +45,6 @@ class DigiBallImage():
                 x = center[0] + 0.6 * self._radius * cos(2 * pi * i / 12)
                 y = center[1] + 0.6 * self._radius * sin(2 * pi * i / 12)
                 draw.line([(x,y),center], fill="black")
-
-
 
             # Calculate tip outline position
             ball_radius = self._ball_diameter / 2
@@ -104,19 +109,31 @@ class DigiBallImage():
 
             img.save(self._output_path, format='PNG')
 
-        except:
-            pass
-
-
-
-
-
-#Test
-dbimg = DigiBallImage("assets/test.png",2.25,False)
-
-import time, random
-while 1:
-    time.sleep(1)
-    print("writing")
-    dbimg.draw(int(360*random.random()),int(55*random.random()))
-
+        except Exception as e:            
+            print(f"An exception occurred: {e}")             
+            
+    def update(self, mdata):
+        
+        
+        """
+        #Wait at least 0.5 seconds to limit redraws
+        curtime = time.time()
+        if (curtime-self._timestamp)<0.5:
+            return
+        
+        #Update timestamp and continue
+        self._timestamp = curtime
+        """
+        
+        #Parse data
+        tip_percent = int(mdata[11])
+        speed_factor = int(mdata[12])
+        spin_horz_dps = struct.unpack('>h', mdata[13:15])[0]
+        spin_vert_dps = struct.unpack('>h', mdata[15:17])[0]
+        spin_mag_rpm = sqrt(spin_horz_dps ** 2 + spin_vert_dps ** 2) / 6        
+        spin_degrees = 180 / pi * atan2(spin_horz_dps, spin_vert_dps)
+        
+        print(spin_degrees, tip_percent)
+        
+        #Redraw
+        self._draw(spin_degrees, tip_percent) 
