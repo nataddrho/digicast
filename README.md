@@ -7,7 +7,7 @@ The DigiBall is a digital billiards ball that measures the accuracy of your stro
  - Version 1.1.0: 11/30/2024 - Now works with the DigiCue
  - Version 1.1.2: 01/13/2025 - Improved BLE scanning efficiency, smooth counting timer.
  - Version 1.1.3: 06/17/2025 - Changed lower left dial from speed to spin angle in clock format.
-
+ - Version 1.2.0: 03/18/2026 - Added capability to save images to /dev/shm and expose with a hostspot webserver at http://10.42.0.1:5000. Use nmcli to setup hotspot services and enable webserver in bluetooth_le.py.
 
 See www.digicue.net for more information.
 

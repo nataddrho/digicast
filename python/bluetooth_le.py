@@ -22,6 +22,7 @@ class BLE_async():
 
     def __init__(self):
         self.test = False #Turn on to test graphical display
+        self.webserver_image_generation = False #Save every DigiBall image to "/dev/shm"
         self._done = True
         self._digiball_last_shot_number = -1
         self._digiball_timestamp = None
@@ -31,8 +32,7 @@ class BLE_async():
         self._digicue_player_data = [None, None]
         self._new_device = False
         self._webserver_objects = {}
-        self._webserver_output_path = "/dev/shm/digicast"
-        
+        self._webserver_output_path = "/dev/shm"
         self._ball_types =((2.250, "White", 0.465, 0.358),  # Pool
                            (2.438, "White", 0.465, 0.358),  # Carom
                            (2.438, "Yellow", 0.465, 0.358),  # Carom yellow
@@ -116,18 +116,19 @@ class BLE_async():
                 if device_type==1: #DigiBall device type is always 1
                     
                     # If it is a digiball, generate image on webserver
-                    if mac_address in self._webserver_objects:
-                        gen_obj = self._webserver_objects[mac_address]
-                    else:
-                        image_file_name = "%s/digiball-%s.png"%(self._webserver_output_path,mac_address)
-                        ball_type = (mdata[3] >> 4) & 0xF
-                        if ball_type>(len(self._ball_types)-1):
-                            ball_type = 0
-                        properties = self._ball_types[ball_type]                        
-                        gen_obj = DigiBallImage(self._webserver_output_path, properties)
-                        self._webserver_objects[mac_address] = gen_obj
+                    if self.webserver_image_generation:
+                        if mac_address in self._webserver_objects:
+                            gen_obj = self._webserver_objects[mac_address]
+                        else:
+                            image_file_name = "%s/digiball-%s.png"%(self._webserver_output_path,mac_address)
+                            ball_type = (mdata[3] >> 4) & 0xF
+                            if ball_type>(len(self._ball_types)-1):
+                                ball_type = 0
+                            properties = self._ball_types[ball_type]                        
+                            gen_obj = DigiBallImage(self._webserver_output_path, properties)
+                            self._webserver_objects[mac_address] = gen_obj
                         
-                    gen_obj.update(mdata)
+                        gen_obj.update(mdata)
 
                     # Save device as target if brought close to receiver
                     rssi_range = -55

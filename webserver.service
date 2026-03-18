@@ -1,13 +1,13 @@
 #!/bin/bash
 
 [Unit]
-Description=DigiCastApp
+Description=DigiCastWebServer
 After=multi-user.target
 
 [Service]
 WorkingDirectory=/home/digicast/digicast/python
-ExecStart=/usr/bin/python3 /home/digicast/digicast/python/main.py
-Restart=on-failure
+ExecStart=/usr/bin/gunicorn -w 2 -b 0.0.0.0:5000 webserver:app
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

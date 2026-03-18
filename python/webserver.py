@@ -3,13 +3,10 @@ import os
 
 app = Flask(__name__)
 
-SHM_FOLDER = "shm"
-
-# Ensure folder exists
-os.makedirs(SHM_FOLDER, exist_ok=True)
+SHM_FOLDER = "/dev/shm"
 
 # Serve files from shm folder
-@app.route("/shm/<path:filename>")
+@app.route("%s/<path:filename>"%SHM_FOLDER)
 def serve_file(filename):
     file_path = os.path.join(SHM_FOLDER, filename)
 
@@ -31,16 +28,16 @@ def index():
     html = """
     <html>
     <head>
-        <title>SHM File List</title>
+        <title>File List</title>
         <meta http-equiv="refresh" content="5">
     </head>
     <body>
-        <h1>Files in /shm</h1>
+        <h1>DigiCast</h1>
         <ul>
     """
 
     for f in files:
-        html += f'<li><a href="/shm/{f}">{f}</a></li>'
+        html += f'<li><a href="%s/{f}">{f}</a></li>'%SHM_FOLDER
 
     html += """
         </ul>

@@ -187,7 +187,7 @@ class Scaffold():
 
                 # Version
                 font = pygame.font.SysFont("Tahoma", 40)
-                fs = font.render("DigiCast\u2122 version %s (%s)"%(version.version, version.date), True, (255, 255, 255))
+                fs = font.render("DigiCast\u2122 version %s (%s) http://10.42.0.1:5000"%(version.version, version.date), True, (255, 255, 255))
                 text_pos = (center_x - fs.get_width() / 2,
                             self._height - 3* fs.get_height() / 2)
                 pygame.draw.rect(self._screen, (0, 0, 0), (text_pos[0], text_pos[1], fs.get_width(), fs.get_height()))
