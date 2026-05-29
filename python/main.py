@@ -11,6 +11,9 @@ import asyncio
 
 
 def gui_main():
+    
+    #Show multiple devices as a split screen
+    allow_multiple_devices = False
 
     ble = bluetooth_le.BLE_async()
     q = queue.Queue()
@@ -31,8 +34,12 @@ def gui_main():
     gameOn = True
 
     # Limit frame rate
-    clock = pygame.time.Clock()
-
+    clock = pygame.time.Clock()    
+    
+    # Device lock
+    first_digiball_found = False
+    first_digicue_found = False
+    
     # Our game loo
     i = 0
     while gameOn:
@@ -59,6 +66,21 @@ def gui_main():
 
         elif not q.empty():
             digiball_data, digicue_data = q.get()
+            
+            #Eliminate data if allow multiple devices is false (don't allow split screen)
+            if not allow_multiple_devices:
+                digiball_data[1] = None
+                digicue_data[1] = None
+                if not first_digiball_found and not first_digicue_found:
+                    if digiball_data[0] is not None:
+                        first_digiball_found = True
+                    elif digicue_data[0] is not None:
+                        first_digicue_found = True
+                elif first_digiball_found:
+                    digicue_data[0] = None
+                else:
+                    digiball_data[0] = None
+            
             if (digiball_data[0] is not None or digiball_data[1] is not None or
                     digicue_data[0] is not None or digicue_data[1] is not None):
 

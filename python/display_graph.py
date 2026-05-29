@@ -45,12 +45,13 @@ class Graph():
             self._text_label.append(self._font.render(self._label[i], True, self._text_color))
             self._text_score.append(self._font.render(self._score[i], True, self._text_color))
 
-    def update_data(self, value_norms, labels, scores, thresholds, enabled):
+    def update_data(self, value_norms, labels, scores, thresholds, enabled, force_red):
         self._value_norm = value_norms
         self._label = labels
         self._score = scores
         self._threshold = thresholds
         self._enabled = enabled
+        self._force_red = force_red
         self._data_changed = True
 
     def _draw_bar(self, position):
@@ -66,6 +67,10 @@ class Graph():
         if not self._enabled[position]:
             color = (25,25,25)
             bd_color = (50,50,50)
+        elif self._force_red[position]:
+            color = (192,0,0)
+        elif self._threshold[position] is None:
+            color = (0,128,0)
         elif self._value_norm[position] >= self._threshold[position]:
             color = (0,128,0)
         else:
@@ -83,9 +88,9 @@ class Graph():
 
         width_show = self._width * self._value_norm[position]
         rect = pygame.Rect(left + width_show, top-pad/2, width-width_show, height+pad)
-        pygame.draw.rect(self._screen, black, rect, 0)
-        x_thresh = self._left + self._width * self._threshold[position]
-        if self._enabled[position]:
+        pygame.draw.rect(self._screen, black, rect, 0)        
+        if self._enabled[position] and self._threshold[position] is not None:
+            x_thresh = self._left + self._width * self._threshold[position]
             pygame.draw.line(self._screen, (100,100,100), (x_thresh, top), (x_thresh, top+height), 3)
         x1 = left + radius
         x2 = left + width - radius
@@ -108,7 +113,7 @@ class Graph():
             text_pos = (left + width - pad - self._text_score[position].get_width(), top + (height - self._text_score[position].get_height()) / 2)
             self._screen.blit(self._text_score[position], text_pos)
 
-    def draw(self, left, top, width, height):
+    def draw(self, left, top, width, height, was_reset):
         if width != self._width or left !=self._left:
             self._left = left
             self._top = top
@@ -122,10 +127,20 @@ class Graph():
 
             # Update text
             self._update_text()
-
-        if self._label is not None:
-            for i in range(0,self._bars_total):
-                self._draw_bar(i)
+        
+        if was_reset:
+            font = pygame.font.SysFont("Tahoma", 56)
+            fs = font.render('Start Shooting...', True, (255, 255, 255))
+            center_x = left+width/2
+            center_y = top+height/2
+            text_pos = (center_x - fs.get_width() / 2,
+                        center_y - fs.get_height() / 2)
+            pygame.draw.rect(self._screen,(0,0,0),(text_pos[0],text_pos[1],fs.get_width(),fs.get_height()))    
+            self._screen.blit(fs, text_pos)            
+        else:
+            if self._label is not None:
+                for i in range(0,self._bars_total):
+                    self._draw_bar(i)
 
         # Frame outline
         #color = (255, 255, 255)

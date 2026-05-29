@@ -230,6 +230,14 @@ class BLE_async():
                             player = 1
                         else:
                             player = 2
+                            
+                        #Check for reset
+                        was_reset = False
+                        if mdata[0]==0:
+                            was_reset = True
+                            for i in range(6,len(mdata)):
+                                if mdata[i]!=0:
+                                    was_reset = False
 
                         config = mdata[1]
                         aconf0 = mdata[2]
@@ -281,6 +289,7 @@ class BLE_async():
                             finish_t = [1/3, 1.5/3, 2/3, 2.5/3]
 
                             data = {}
+                            data["Was Reset"] = was_reset
                             data["RSSI"] = rssi
                             data["MAC Address"] = mac_address
 
@@ -296,7 +305,7 @@ class BLE_async():
                             data["Finish Enabled"] = (aconf0>>7)&1==1
                             data["Tip Steer"] = score_steering/10
                             data["Tip Steer Text"] = "%.1f"%score_steering
-                            data["Tip Steer Threshold"] = data["Straightness Threshold"] #steering_t[aconf2&3]
+                            data["Tip Steer Threshold"] = None
                             data["Tip Steer Enabled"] = (aconf0>>4)&1==1
                             data["Follow Through"] = score_follow/10
                             data["Follow Through Text"] = "%.1f"%score_follow

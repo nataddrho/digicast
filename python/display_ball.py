@@ -94,8 +94,9 @@ class Ball():
         # Draw tip contact point
         color = (0, 255, 255)
         pygame.draw.circle(self._screen, color, (x_contact, y_contact), tr)
-
-        #Draw digicue straightness
+        
+        """
+        #Draw digicue straightness on ball
         if straightness is not None:
             magnitude, angle, threshold = straightness
             color = (0,0,255)
@@ -111,6 +112,7 @@ class Ball():
                 x = x_contact + arrow_r * sin(pi/180 * (angle + 30*i))
                 y = y_contact + arrow_r * -cos(pi/180 * (angle + 30*i))
                 pygame.draw.line(self._screen, color, (x_contact, y_contact), (x, y), 3)
+        """
 
 
 

@@ -202,25 +202,34 @@ class Scaffold():
                         angle = digicue_data["Straightness Angle"]
                         threshold = 1 - digicue_data["Straightness Threshold"]
                         straightness = (magnitude, angle, threshold)
+                        digicue_was_reset = digicue_data["Was Reset"]
+                        
                     else:
                         straightness = None
+                        digicue_was_reset = False
 
-                    if digicue_present:
-                        # DigiBall Graph
+                    if digicue_present:                        
+                        
+                        # DigiCue Graph                                                   
                         labels = ["Finish","Straightness","Tip Steer","Follow Through","Jab","Backstroke Pause","Shot Interval"]
                         values_norm = len(labels)*[None]
                         scores = len(labels)*[None]
                         thresholds = len(labels)*[None]
                         enabled = len(labels)*[None]
+                        force_red = len(labels)*[None]
+                        
                         for i in range(0,len(labels)):
                             label = labels[i]
                             values_norm[i] = digicue_data[label]
                             scores[i] = digicue_data["%s Text"%label]
                             thresholds[i] = digicue_data["%s Threshold"%label]
                             enabled[i] = digicue_data["%s Enabled"%label]
+                            force_red[i] = False
 
-                        graph.update_data(values_norm, labels, scores, thresholds, enabled)
-                        graph.draw(left + width_digiball + 10, top + 10, width_digicue - 20, height - 20)
+                        force_red[2] = values_norm[1]<thresholds[1] #Force tip steer red if straightness is less than threshold
+
+                        graph.update_data(values_norm, labels, scores, thresholds, enabled, force_red)
+                        graph.draw(left + width_digiball + 10, top + 10, width_digicue - 20, height - 20, digicue_was_reset)
 
                     if not digiball_present:
 
