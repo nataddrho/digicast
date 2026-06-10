@@ -62,8 +62,8 @@ See www.digicue.net for more information.
 
 As of version 1.2.1, two-player mode is disabled by default. This is to reduce accidental scanning of other player's devices when being used in a public environment. To enable two-player mode / split-screen TV of a purchased DigiCast unit, you will need the following tools:
 
-Torx T8 screw-driver
-Micro-USB male to USB-A female adapter
+- Torx T8 screw-driver
+- Micro-USB male to USB-A female adapter
 
 1. (If applicable) Unscrew the four screws holding the case together. Remove the Raspberry Pi Zero 2 W from the case.
 
