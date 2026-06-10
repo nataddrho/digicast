@@ -58,6 +58,43 @@ See www.digicue.net for more information.
 
 18. Shutdown the system by typing ```sudo shutdown now```. When powered off you can then remove the SD Card and store or copy the image as you wish.
 
+### Enabling Two-Player Mode:
+
+As of version 1.2.1, two-player mode is disabled by default. This is to reduce accidental scanning of other player's devices when being used in a public environment. To enable two-player mode / split-screen TV of a purchased DigiCast unit, you will need the following tools:
+
+Torx T8 screw-driver
+Micro-USB male to USB-A female adapter
+
+1. (If applicable) Unscrew the four screws holding the case together. Remove the Raspberry Pi Zero 2 W from the case.
+
+2. Plug a monitor into the HDMI port using the supplied micro-HDMI to HDMI cable, a keyboard into the USB port using the USB adapter, and the supplied AC adapter into the power port.
+
+3. Wait for the device to boot up.
+
+4. When the DigiCast welcome screen appears, press Backspace once. This exits the program.
+
+5. Log into the system with username digicast and password DigiCast1!
+
+6. Type ```sudo raspi-config``` to open the configuration tool. Navigate to Performance Options > Overlay File System and disable the overlay.
+
+7. Exit and type ```sudo reboot``` to reboot the system.
+
+8. Repeat steps 4 and 5 above.
+
+9. Type ```nano digicast/python/main.py```
+
+10. Navigate to line 16 and change ```allow_multiple_devices = False``` to ```True```
+
+11. Press Ctrl-X to exit nano and press Y to save.
+
+12. Exit and type ```sudo reboot``` to reboot the system and repeat steps 4 and 5 above.
+
+13. Type ```sudo raspi-config``` to open the configuration tool. Navigate to Performance Options > Overlay File System and enable the overlay again.
+
+14. Type ```sudo shutdown -h now``` to shutdown the system. Wait for the LED on the Zero 2 to blink 10 times before unplugging the AC adapter.
+
+15. (If applicable) Reasseble the Zero 2 into the case and tighten screws.
+
 ### Generating a Backup Image:
 
 1. Format an SD Card or USB Flash drive (8GB or larger) to NTFS or exFAT. Don't use FAT32 because the individual backup image file size is too small for this format.
