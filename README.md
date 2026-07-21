@@ -1,21 +1,21 @@
 
 # DigiCast
-A light-weight Python-based application for Raspberry Pi Zero 2 W (or any other platform that has BLE hardware and can run Python). The program displays information from one or two DigiBalls in real time. This is a BLE straight to HDMI solution.
+A light-weight Python-based application for Raspberry Pi Zero 2 W (or any other platform that has BLE hardware and can run Python). The program displays information from one or two DigiBalls (and DigiCues) in real time. This is a BLE straight to HDMI solution.
 
 The DigiBall is a digital billiards ball that measures the accuracy of your stroke so that you can compare it to your intentions. Novice players may not give any thought to the importance of where on the face of the cue ball they hit it, as long as the cue ball makes the object ball go in the pocket. But for any high level of play, it is extremely important. Hitting the ball too much on one side of center will cause it to deflect in the opposite direction of your aiming line, resulting in a miss. Advanced players know this, and use the deviation in combination with deliberate tip offset to both pocket the object ball and spin the cue ball off of the rails into desired positions. But again, deviations in the accuracy of the deliberate off-center tip hits cause poor results. By obtaining real time feedback on where you actually hit the ball and comparing it to where you intended to hit the ball, you can make permanent adjustments quickly.
 
- - Version 1.1.0: 11/30/2024 - Now works with the DigiCue
- - Version 1.1.2: 01/13/2025 - Improved BLE scanning efficiency, smooth counting timer.
- - Version 1.1.3: 06/17/2025 - Changed lower left dial from speed to spin angle in clock format.
- - Version 1.2.0: 03/18/2026 - Added capability to save images to /dev/shm and expose with a hostspot webserver at http://10.42.0.1:5000. Use nmcli to setup hotspot services and enable webserver in bluetooth_le.py.
  - Version 1.2.1: 05/26/2026 - Fixed DigiCue straightness threshold bug, disabled hotspot by default, single billiard device as default.
+ - Version 1.2.0: 03/18/2026 - Added capability to save images to /dev/shm and expose with a hostspot webserver at http://10.42.0.1:5000. Use nmcli to setup hotspot services and enable webserver in bluetooth_le.py.
+ - Version 1.1.3: 06/17/2025 - Changed lower left dial from speed to spin angle in clock format.
+ - Version 1.1.2: 01/13/2025 - Improved BLE scanning efficiency, smooth counting timer.
+ - Version 1.1.0: 11/30/2024 - Now works with the DigiCue
 
 See www.digicue.net for more information.
 
 ### Requirements:
 
 - Raspberry Pi Zero 2 W
-- Micro-SD card (16 GB or greater, 32 GB recommended)
+- Micro-SD card (16 GB or greater, 32 GB recommended. SanDisk Ultra 32GB A1 is a good choice)
 - PC with a micro-SD card reader or USB reader
 - Micro HDMI to HDMI cable
 - 5VDC Power Adapter (5W or greater)
@@ -94,6 +94,59 @@ As of version 1.2.1, two-player mode is disabled by default. This is to reduce a
 14. Type ```sudo shutdown -h now``` to shutdown the system. Wait for the LED on the Zero 2 to blink 10 times before unplugging the AC adapter.
 
 15. (If applicable) Reasseble the Zero 2 into the case and tighten screws.
+
+### Enabling Shared Image Folder
+
+Ball graphics can be written as images to RAM and shared as read only over the network. This can be useful for generating images for overlays for streaming software such as OBS. Wi-Fi and Bluetooth share the same radio, so it is ideal to install and configure a separate USB Wi-Fi dongle to decrease latency.
+
+1. Open the device, connect and disable the file system overlay. See steps in Enabling Two-Player Mode above.
+
+2. Type ```sudo nmtui``` and connect to your desired network for sharing.
+
+3. Type ```sudo apt update``` and then ```sudo apt install samba``` (assuming that you have an internet connection).
+
+4. Create a Samba user by typing ```sudo smbpasswd -a digicast``` and enter DigiCast1!, or any other user/password you want.
+
+5. Type ```sudo nano /etc/samba/smb.conf``` to edit the configuration file. Add the following section to the end of the file:
+
+```
+[digiball]
+   path = /dev/shm
+   browseable = yes
+   read only = yes
+   guest ok = no
+   valid users = digicast
+```
+
+6. Restart and enable samba
+```
+sudo systemctl restart smbd
+sudo systemctl enable smbd
+```
+
+7. Test your shared folder and access it via Windows by connecting to the same Wi-Fi network chosen in step 2, right-clicking on Network and selecting Map Network Drive. Then enter the username (sometimes listed as email) and password. Navigate to the shared Network Drive letter you have chosen. For Mac, open Finder and choose Go -> Connect to Server and enter: ```smb://digicast/``` or ```smb://<Pi-PI>/```. When the DigiBall is working images should appear in this folder. Use these images with OBS for an overlay on a live stream.
+
+8. (Optional) As mentioned it is recommended to use a separate Wi-Fi adapter so that Bluetooth doesn't have to compete with Wi-Fi. Procure and plug in a Wi-Fi dongle into the USB port and use adapters if necessary.
+
+9. Check the interfaces by typing ```ip link```. The external USB Wi-Fi dongle is usually ```wlan1```. Bluetooth is usually ```hci0```
+
+10. Check that the Wi-Fi dongle adapter is present on the USB bus with ```lsusb```
+
+11. See available Wi-Fi adapters with ```nmcli device```
+
+12. Connect using ```wlan1``` with ```sudo nmcli device wifi list ifname wlan1```
+
+13. Then, type ```nmcli device wifi connect "YourSSID" password "YourPassword" ifname wlan1```
+
+14. Disable the internal Wi-Fi device by typing ```sudo nano /boot/firmware/config.txt``` and adding the line ```dtoverlay=disable-wifi```
+
+15. Save and reboot. (```sudo reboot```)
+
+16. After reboot type ```ip link``` and verify that only the USB Wi-Fi dongle is in use.
+
+17. Verify that Bluetooth is still working by typing ```hciconfig``` or ```bluetoothctl show```
+
+18. Re-enable the file system overlay. See steps in Enabling Two-Player Mode above.
 
 ### Generating a Backup Image:
 
