@@ -99,7 +99,7 @@ As of version 1.2.1, two-player mode is disabled by default. This is to reduce a
 
 Ball graphics can be written as images to RAM and shared as read only over the network. This can be useful for generating images for overlays for streaming software such as OBS. Wi-Fi and Bluetooth share the same radio, so it is ideal to install and configure a separate USB Wi-Fi dongle to decrease latency.
 
-1. Open the device, connect and disable the file system overlay. See steps in Enabling Two-Player Mode above.
+1. Open the device, connect and disable both the file system and boot overlay. See steps in Enabling Two-Player Mode above.
 
 2. Type ```sudo nmtui``` and connect to your desired network for sharing.
 
@@ -124,29 +124,31 @@ sudo systemctl restart smbd
 sudo systemctl enable smbd
 ```
 
-7. Test your shared folder and access it via Windows by connecting to the same Wi-Fi network chosen in step 2, right-clicking on Network and selecting Map Network Drive. Then enter the username (sometimes listed as email) and password. Navigate to the shared Network Drive letter you have chosen. For Mac, open Finder and choose Go -> Connect to Server and enter: ```smb://digicast/``` or ```smb://<Pi-PI>/```. When the DigiBall is working images should appear in this folder. Use these images with OBS for an overlay on a live stream.
+7. Test your shared folder and access it via Windows by connecting to the same Wi-Fi network chosen in step 2, right-clicking on Network and selecting Map Network Drive. Choose a drive letter, the path is \\digicast\digiball or \\<ip address>\digiball, and then the username (sometimes listed as email) and password. Navigate to the shared Network Drive letter you have chosen. For Mac, open Finder and choose Go -> Connect to Server and enter: ```smb://digicast/digiball``` or ```smb://<ip address>/digiball```. When the DigiBall is working images should appear in this folder. Use these images with OBS for an overlay on a live stream.
 
 8. (Optional) As mentioned it is recommended to use a separate Wi-Fi adapter so that Bluetooth doesn't have to compete with Wi-Fi. Procure and plug in a Wi-Fi dongle into the USB port and use adapters if necessary.
 
-9. Check the interfaces by typing ```ip link```. The external USB Wi-Fi dongle is usually ```wlan1```. Bluetooth is usually ```hci0```
+9. Check the interfaces by typing ```nmcli device```. The external USB Wi-Fi dongle is usually ```wlan1```.
 
 10. Check that the Wi-Fi dongle adapter is present on the USB bus with ```lsusb```
 
-11. See available Wi-Fi adapters with ```nmcli device```
+11. Check available networks seen by the dongle with ```sudo nmcli device wifi list ifname wlan1```
 
-12. Connect using ```wlan1``` with ```sudo nmcli device wifi list ifname wlan1```
+12. Create a connection with the dongle by typing ```sudo nmcli device wifi connect "YourSSID" password "YourPassword" ifname wlan1```
 
-13. Then, type ```nmcli device wifi connect "YourSSID" password "YourPassword" ifname wlan1```
+13. Run ```ifconfig``` and record the IP address for wlan1.
 
-14. Disable the internal Wi-Fi device by typing ```sudo nano /boot/firmware/config.txt``` and adding the line ```dtoverlay=disable-wifi```
+14. Type ```sudo nmcli connection modify "YourSSID" connection.autoconnect no;sudo nmcli device disconnect wlan0``` to disable wlan0. Or use the ```sudo nmtui``` tool to modify the connections directly (and disable wlan0). Note: If YourSSID was the same as an existing connection then the name might automatically change.
 
-15. Save and reboot. (```sudo reboot```)
+15. Save and reboot. (```sudo reboot```). If you are using ssh then you will need to connect to the dongle's new IP address.
 
-16. After reboot type ```ip link``` and verify that only the USB Wi-Fi dongle is in use.
+16. After reboot type ```nmcli device``` and verify that only the USB Wi-Fi dongle on wlan1 is in use, and that wlan0 is disconnected.
 
-17. Verify that Bluetooth is still working by typing ```hciconfig``` or ```bluetoothctl show```
+17. Verify that Bluetooth is still working by typing ```hciconfig``` and look for the text UP RUNNING.
 
-18. Re-enable the file system overlay. See steps in Enabling Two-Player Mode above.
+18. Finally, enable image generation by typing ```nano ~/digicast/python/bluetooth_le.py``` and changing line 25 to ```self.webserver_image_generation = True```
+
+19. Re-enable the file system overlay. See steps in Enabling Two-Player Mode above.
 
 ### Generating a Backup Image:
 
